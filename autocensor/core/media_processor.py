@@ -134,6 +134,15 @@ class MediaProcessor:
             subtitle_file=output_sub_path if output_sub_path.exists() else None
         )
 
+        # Save cleaned subtitle alongside original video path for Stremio auto-loading
+        in_place_sub = video_path.with_suffix(".srt")
+        if output_sub_path.exists() and output_sub_path != in_place_sub:
+            try:
+                in_place_sub.write_text(output_sub_path.read_text(encoding="utf-8"), encoding="utf-8")
+                logger.info(f"In-place subtitle created for Stremio auto-loading: {in_place_sub}")
+            except Exception as e:
+                logger.debug(f"In-place subtitle write notice: {e}")
+
         # Cleanup temporary WAV files
         for tmp in [temp_audio_in, temp_audio_out]:
             if tmp.exists():
@@ -151,6 +160,7 @@ class MediaProcessor:
             "input_video": str(video_path),
             "output_video": str(output_video_path),
             "output_subtitle": str(output_sub_path) if output_sub_path.exists() else None,
+            "in_place_subtitle": str(in_place_sub) if in_place_sub.exists() else None,
             "detections_count": len(detections),
             "detections": detections
         }

@@ -1,3 +1,6 @@
+import os
+import sys
+import subprocess
 import time
 import threading
 import tkinter as tk
@@ -127,13 +130,23 @@ class StremioTabFrame(ctk.CTkFrame if HAS_CTK else tk.Frame):
                 return
 
             def on_stremio_file(file_path: Path):
-                self.log(f"[STREMIO DETECTED] New Episode File: {file_path.name}")
+                self.log(f"[STREMIO DETECTED] Episode file: {file_path.name}")
                 try:
                     res = self.processor.process(
                         video_path=file_path,
                         progress_callback=lambda pct, txt: self.log(f"[{file_path.name}] {txt}")
                     )
-                    self.log(f"[SUCCESS] Cleaned Stremio episode -> {Path(res['output_video']).name}")
+                    out_vid = Path(res['output_video'])
+                    self.log(f"[SUCCESS] Cleaned Stremio episode -> {out_vid.name}")
+
+                    # Auto-open clean video player
+                    if out_vid.exists():
+                        self.log(f"[LAUNCH] Opening clean censored episode...")
+                        if sys.platform == "win32":
+                            os.startfile(str(out_vid))
+                        else:
+                            subprocess.Popen(["xdg-open", str(out_vid)])
+
                 except Exception as e:
                     self.log(f"[ERROR] Failed censoring Stremio episode {file_path.name}: {e}")
 
