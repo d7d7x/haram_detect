@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 STREMIO_SERVER_URL = "http://127.0.0.1:11470"
 
 def get_stremio_cache_dir() -> Optional[Path]:
-    """Find Stremio cache directory across all possible user drive configurations (prioritizing G:\stremio-cache)."""
+    r"""Find Stremio cache directory across all possible user drive configurations (prioritizing G:\stremio-cache)."""
     candidates = [
         Path("G:/stremio-cache"),
         Path("G:/stremio-server/stremio-cache")
