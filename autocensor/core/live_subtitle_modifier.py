@@ -2,7 +2,7 @@ import re
 import time
 import logging
 from pathlib import Path
-from typing import Set
+from typing import Set, Optional
 from autocensor.core.dictionary import CensorshipDictionary
 from autocensor.core.subtitle_engine import SubtitleEngine
 
