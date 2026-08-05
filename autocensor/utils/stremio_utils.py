@@ -81,24 +81,49 @@ def get_active_stremio_stream_info() -> Optional[Dict[str, Any]]:
     return None
 
 def find_mpv_executable() -> Optional[Path]:
-    """Find MPV executable on system."""
+    """Find MPV executable on system across project data, PATH, and Windows install paths."""
+    # Check internal portable MPV location first
+    project_root = Path(__file__).resolve().parent.parent.parent
+    internal_mpv = project_root / "data" / "mpv" / "mpv.exe"
+    if internal_mpv.exists():
+        return internal_mpv
+
+    # Check PATH environment variable
     mpv = shutil.which("mpv") or shutil.which("mpv.exe")
     if mpv:
         return Path(mpv)
 
     if sys.platform == "win32":
+        user_profile = os.getenv("USERPROFILE", "")
+        local_app_data = os.getenv("LOCALAPPDATA", "")
+        app_data = os.getenv("APPDATA", "")
+
         candidates = [
             Path("C:/Program Files/mpv/mpv.exe"),
             Path("C:/Program Files (x86)/mpv/mpv.exe"),
+            Path("C:/Program Files/mpv.net/mpvnet.exe"),
+            Path("C:/Program Files/mpv.net/mpv.exe"),
             Path("C:/mpv/mpv.exe"),
             Path("C:/mpv-x86_64/mpv.exe"),
-            Path(os.getenv("LOCALAPPDATA", "")) / "Programs" / "mpv" / "mpv.exe",
-            Path(os.getenv("USERPROFILE", "")) / "scoop" / "apps" / "mpv" / "current" / "mpv.exe",
+            Path(local_app_data) / "Programs" / "mpv" / "mpv.exe",
+            Path(local_app_data) / "Programs" / "shinchiro.mpv" / "mpv.exe",
+            Path(user_profile) / "scoop" / "apps" / "mpv" / "current" / "mpv.exe",
             Path("C:/ProgramData/chocolatey/bin/mpv.exe"),
+            Path(app_data) / "stremio" / "mpv.exe",
         ]
+
         for p in candidates:
             if str(p) and p.exists():
                 return p
+
+        # Search drive C:\Program Files recursively for mpv.exe if not found above
+        try:
+            pf = Path("C:/Program Files")
+            if pf.exists():
+                for found in pf.glob("**/mpv.exe"):
+                    return found
+        except Exception:
+            pass
 
     return None
 
@@ -134,7 +159,6 @@ def locate_subtitle_candidates_in_cache(cache_dir: Optional[Path] = None) -> Lis
     for ext in [".srt", ".vtt", ".ass"]:
         sub_files.extend(cache_dir.rglob(f"*{ext}"))
 
-    # Sort by modification time (newest first)
     sub_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     return sub_files
 

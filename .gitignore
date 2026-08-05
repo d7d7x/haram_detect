@@ -34,6 +34,7 @@ venv.bak/
 
 # Temporary data & media outputs
 temp/
+data/mpv/
 *_Censored.*
 *.wav
 *.mp4
