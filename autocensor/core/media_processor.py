@@ -8,6 +8,7 @@ from autocensor.core.subtitle_engine import SubtitleEngine
 from autocensor.core.audio_engine import AudioCensorEngine
 from autocensor.core.stt_engine import SpeechToTextEngine
 from autocensor.utils.ffmpeg_utils import extract_audio, remux_video_and_audio, is_ffmpeg_available
+from autocensor.utils.stremio_utils import extract_embedded_subtitles, locate_subtitle_candidates_in_cache
 
 logger = logging.getLogger(__name__)
 
@@ -57,12 +58,28 @@ class MediaProcessor:
         update_progress(0.15, "Searching for subtitles...")
         found_sub_path = subtitle_path
 
+        # Check sidecar files next to video
         if not found_sub_path:
             for ext in SUBTITLE_EXTENSIONS:
                 candidate = video_path.with_suffix(ext)
                 if candidate.exists():
                     found_sub_path = candidate
                     break
+
+        # Check Stremio cache for subtitle candidates
+        if not found_sub_path:
+            cache_subs = locate_subtitle_candidates_in_cache()
+            if cache_subs:
+                found_sub_path = cache_subs[0]
+                update_progress(0.20, f"Found subtitle candidate in Stremio cache: {found_sub_path.name}")
+
+        # Attempt extracting embedded subtitles from video container
+        if not found_sub_path:
+            update_progress(0.22, "Extracting embedded subtitle track via FFmpeg...")
+            extracted_sub = extract_embedded_subtitles(video_path, output_dir=TEMP_DIR)
+            if extracted_sub and extracted_sub.exists():
+                found_sub_path = extracted_sub
+                update_progress(0.25, f"Extracted embedded subtitle track: {found_sub_path.name}")
 
         detections = []
         mute_timestamps: List[Tuple[float, float]] = []
@@ -134,7 +151,7 @@ class MediaProcessor:
         if output_sub_path.exists() and output_sub_path != in_place_sub:
             try:
                 in_place_sub.write_text(output_sub_path.read_text(encoding="utf-8"), encoding="utf-8")
-                logger.info(f"In-place subtitle created for Stremio auto-loading: {in_place_sub}")
+                logger.info(f"In-place subtitle created for auto-loading: {in_place_sub}")
             except Exception as e:
                 logger.debug(f"In-place subtitle write notice: {e}")
 
