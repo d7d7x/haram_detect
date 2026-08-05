@@ -3,6 +3,7 @@ import sys
 import shutil
 import json
 import logging
+import subprocess
 import urllib.request
 from pathlib import Path
 from typing import Optional, Dict, Any, List
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 STREMIO_SERVER_URL = "http://127.0.0.1:11470"
 
 def get_stremio_cache_dir() -> Optional[Path]:
-    r"""Find Stremio cache directory across all possible user drive configurations (prioritizing G:\stremio-cache)."""
+    r"""Find Stremio cache directory across all possible user drive configurations."""
     candidates = [
         Path("G:/stremio-cache"),
         Path("G:/stremio-server/stremio-cache")
@@ -24,6 +25,7 @@ def get_stremio_cache_dir() -> Optional[Path]:
     if sys.platform == "win32":
         user_profile = os.getenv("USERPROFILE")
         appdata = os.getenv("APPDATA")
+        localappdata = os.getenv("LOCALAPPDATA")
         
         if user_profile:
             candidates.append(Path(user_profile) / "stremio-cache")
@@ -34,17 +36,18 @@ def get_stremio_cache_dir() -> Optional[Path]:
             candidates.append(Path(appdata) / "stremio-server" / "stremio-cache")
             candidates.append(Path(appdata) / "stremio-desktop" / "stremio-cache")
 
+        if localappdata:
+            candidates.append(Path(localappdata) / "Programs" / "Ldirect" / "stremio-cache")
+
     elif sys.platform == "darwin":
         candidates.append(Path.home() / "Library" / "Application Support" / "stremio" / "stremio-cache")
     else:  # Linux
         candidates.append(Path.home() / ".stremio-server" / "stremio-cache")
 
-    # Return first candidate that exists
     for p in candidates:
         if p.exists():
             return p
 
-    # Default to creating G:\stremio-cache directly
     g_cache = Path("G:/stremio-cache")
     try:
         g_cache.mkdir(parents=True, exist_ok=True)
@@ -52,21 +55,18 @@ def get_stremio_cache_dir() -> Optional[Path]:
     except Exception:
         pass
 
-    return candidates[0]
-
     return candidates[0] if candidates else None
 
 def get_active_stremio_stream_info() -> Optional[Dict[str, Any]]:
     """
     Query Stremio local streaming server API (http://127.0.0.1:11470/stats.json)
-    to get active streaming episode details (torrent name, file name, download stats).
+    to get active streaming episode details.
     """
     try:
         req = urllib.request.Request(f"{STREMIO_SERVER_URL}/stats.json", headers={"User-Agent": "AutoCensorAI"})
         with urllib.request.urlopen(req, timeout=1.5) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             if data and isinstance(data, dict):
-                # Extract stream stats if torrent is actively downloading/buffering
                 for key, val in data.items():
                     if isinstance(val, dict) and ("name" in val or "filename" in val or "stream" in val):
                         return {
@@ -80,15 +80,37 @@ def get_active_stremio_stream_info() -> Optional[Dict[str, Any]]:
         logger.debug(f"Stremio server query: {e}")
     return None
 
-def find_external_player() -> Optional[Path]:
-    """Find VLC or MPV player executable on system."""
-    vlc = shutil.which("vlc") or shutil.which("vlc.exe")
-    if vlc:
-        return Path(vlc)
-
+def find_mpv_executable() -> Optional[Path]:
+    """Find MPV executable on system."""
     mpv = shutil.which("mpv") or shutil.which("mpv.exe")
     if mpv:
         return Path(mpv)
+
+    if sys.platform == "win32":
+        candidates = [
+            Path("C:/Program Files/mpv/mpv.exe"),
+            Path("C:/Program Files (x86)/mpv/mpv.exe"),
+            Path("C:/mpv/mpv.exe"),
+            Path("C:/mpv-x86_64/mpv.exe"),
+            Path(os.getenv("LOCALAPPDATA", "")) / "Programs" / "mpv" / "mpv.exe",
+            Path(os.getenv("USERPROFILE", "")) / "scoop" / "apps" / "mpv" / "current" / "mpv.exe",
+            Path("C:/ProgramData/chocolatey/bin/mpv.exe"),
+        ]
+        for p in candidates:
+            if str(p) and p.exists():
+                return p
+
+    return None
+
+def find_external_player() -> Optional[Path]:
+    """Find external player executable (prefer MPV for IPC support, fallback VLC)."""
+    mpv = find_mpv_executable()
+    if mpv:
+        return mpv
+
+    vlc = shutil.which("vlc") or shutil.which("vlc.exe")
+    if vlc:
+        return Path(vlc)
 
     if sys.platform == "win32":
         vlc_paths = [
@@ -98,5 +120,46 @@ def find_external_player() -> Optional[Path]:
         for p in vlc_paths:
             if p.exists():
                 return p
+
+    return None
+
+def locate_subtitle_candidates_in_cache(cache_dir: Optional[Path] = None) -> List[Path]:
+    """Search for subtitle files (.srt, .vtt, .ass) in Stremio cache directory."""
+    if not cache_dir:
+        cache_dir = get_stremio_cache_dir()
+    if not cache_dir or not cache_dir.exists():
+        return []
+
+    sub_files = []
+    for ext in [".srt", ".vtt", ".ass"]:
+        sub_files.extend(cache_dir.rglob(f"*{ext}"))
+
+    # Sort by modification time (newest first)
+    sub_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    return sub_files
+
+def extract_embedded_subtitles(video_path: Path, output_dir: Optional[Path] = None) -> Optional[Path]:
+    """Extract embedded subtitle track from video file using FFmpeg into an SRT file."""
+    if not video_path.exists():
+        return None
+
+    out_dir = output_dir or video_path.parent
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_srt = out_dir / f"{video_path.stem}_embedded.srt"
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", str(video_path),
+        "-map", "0:s:0?",
+        "-c:s", "srt",
+        str(out_srt)
+    ]
+    try:
+        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+        if out_srt.exists() and out_srt.stat().st_size > 0:
+            logger.info(f"Extracted embedded subtitle -> {out_srt.name}")
+            return out_srt
+    except Exception as e:
+        logger.debug(f"Embedded subtitle extraction notice for {video_path.name}: {e}")
 
     return None

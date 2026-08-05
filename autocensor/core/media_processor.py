@@ -23,15 +23,15 @@ class MediaProcessor:
         video_path: Path,
         output_video_path: Optional[Path] = None,
         subtitle_path: Optional[Path] = None,
-        mode: str = MODE_BEEP,
+        mode: str = MODE_MUTE,
         progress_callback: Optional[Callable[[float, str], None]] = None
     ) -> Dict[str, Any]:
         """
         Full end-to-end censorship pipeline:
-        1. Subtitle & STT Detection
+        1. Subtitle & STT Detection (Deletion of forbidden terms)
         2. Audio Extraction
-        3. Audio Censorship
-        4. FFmpeg Video Re-muxing
+        3. Audio Censorship (Zero PCM muting)
+        4. FFmpeg Video Re-muxing (-c:v copy)
         """
         def update_progress(pct: float, text: str):
             logger.info(f"[{int(pct * 100)}%] {text}")
@@ -58,7 +58,6 @@ class MediaProcessor:
         found_sub_path = subtitle_path
 
         if not found_sub_path:
-            # Look for matching subtitle file in same directory
             for ext in SUBTITLE_EXTENSIONS:
                 candidate = video_path.with_suffix(ext)
                 if candidate.exists():
@@ -66,34 +65,31 @@ class MediaProcessor:
                     break
 
         detections = []
-        bleep_timestamps: List[Tuple[float, float]] = []
+        mute_timestamps: List[Tuple[float, float]] = []
 
         if found_sub_path and found_sub_path.exists():
             update_progress(0.30, f"Processing subtitle file: {found_sub_path.name}")
-            detections, bleep_timestamps = self.sub_engine.process_subtitles(
+            detections, mute_timestamps = self.sub_engine.process_subtitles(
                 input_sub=found_sub_path,
                 output_sub=output_sub_path
             )
         else:
-            # Run STT engine if available
             update_progress(0.25, "No subtitle file found. Attempting AI transcription...")
             if self.stt_engine.is_available():
-                # First extract temp audio for STT
                 temp_audio_stt = TEMP_DIR / f"temp_stt_{video_path.stem}.wav"
                 extract_audio(video_path, temp_audio_stt)
                 
                 stt_segments = self.stt_engine.transcribe(temp_audio_stt)
                 
-                # Check STT word timestamps against dictionary
                 for seg in stt_segments:
                     matches = self.dictionary.find_matches(seg["text"])
                     if matches:
-                        bleep_timestamps.append((seg["start"], seg["end"]))
+                        mute_timestamps.append((seg["start"], seg["end"]))
                         detections.append({
                             "start_sec": seg["start"],
                             "end_sec": seg["end"],
                             "original": seg["text"],
-                            "censored": "[CENSORED AUDIO]",
+                            "censored": "[MUTED AUDIO]",
                             "matched_terms": [m["term"] for m in matches]
                         })
                 
@@ -116,12 +112,12 @@ class MediaProcessor:
         if not success:
             raise RuntimeError("Failed to extract audio stream from video.")
 
-        # Step 3: Apply Audio Bleeping / Muting
-        update_progress(0.75, f"Applying audio censorship (Mode: {mode.upper()})...")
+        # Step 3: Apply Audio Muting
+        update_progress(0.75, f"Applying audio muting (Mode: {mode.upper()})...")
         self.audio_engine.apply_audio_censorship(
             input_wav=temp_audio_in,
             output_wav=temp_audio_out,
-            timestamps=bleep_timestamps,
+            timestamps=mute_timestamps,
             mode=mode
         )
 
@@ -134,7 +130,6 @@ class MediaProcessor:
             subtitle_file=output_sub_path if output_sub_path.exists() else None
         )
 
-        # Save cleaned subtitle alongside original video path for Stremio auto-loading
         in_place_sub = video_path.with_suffix(".srt")
         if output_sub_path.exists() and output_sub_path != in_place_sub:
             try:
