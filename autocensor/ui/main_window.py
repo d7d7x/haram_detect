@@ -21,12 +21,21 @@ try:
 except ImportError:
     HAS_CTK = False
 
+from autocensor.config import THEME, DATA_DIR
+
 class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("AutoCensor AI - Automated Subtitle & Audio Censorship Engine")
         self.geometry("980x680")
         self.minsize(900, 600)
+
+        icon_ico = DATA_DIR / "app_icon.ico"
+        if icon_ico.exists():
+            try:
+                self.iconbitmap(str(icon_ico))
+            except Exception:
+                pass
 
         self.dictionary = CensorshipDictionary()
 
