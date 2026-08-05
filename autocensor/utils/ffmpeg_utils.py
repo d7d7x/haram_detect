@@ -37,7 +37,7 @@ def remux_video_and_audio(
     subtitle_file: Optional[Path] = None
 ) -> Tuple[bool, str]:
     """
-    Re-mux video with new audio track using robust fallbacks.
+    Re-mux video with new audio track using robust fallbacks for legacy/system FFmpeg binaries.
     Returns (success: bool, error_message: str).
     """
     output_video.parent.mkdir(parents=True, exist_ok=True)
@@ -45,17 +45,19 @@ def remux_video_and_audio(
     # Clean existing file if present
     if output_video.exists():
         try:
-            os.remove(output_video)
+            output_video.unlink()
         except Exception:
             pass
 
-    # Try Attempt 1: Fast stream copy + AAC audio
+    # Try Attempt 1: Fast stream copy + AAC with -strict -2 (Compatibility fix for older FFmpeg)
     cmd1 = [
         "ffmpeg", "-y",
         "-i", str(input_video),
         "-i", str(input_audio),
         "-c:v", "copy",
-        "-c:a", "aac", "-b:a", "192k",
+        "-c:a", "aac",
+        "-strict", "-2",
+        "-b:a", "192k",
         "-map", "0:v:0",
         "-map", "1:a:0"
     ]
@@ -76,13 +78,14 @@ def remux_video_and_audio(
         logger.warning(f"FFmpeg Remux Attempt 1 failed: {e.stderr[:300]}")
         err1 = e.stderr
 
-    # Try Attempt 2: Audio swap without subtitle stream mapping
+    # Try Attempt 2: Audio swap using libvo_aacenc or ac3 for legacy FFmpeg
     cmd2 = [
         "ffmpeg", "-y",
         "-i", str(input_video),
         "-i", str(input_audio),
         "-c:v", "copy",
-        "-c:a", "aac", "-b:a", "192k",
+        "-c:a", "ac3",
+        "-b:a", "192k",
         "-map", "0:v:0",
         "-map", "1:a:0",
         str(output_video)
@@ -90,7 +93,7 @@ def remux_video_and_audio(
     try:
         res = subprocess.run(cmd2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
         if output_video.exists() and output_video.stat().st_size > 0:
-            return True, "Success (Audio Re-muxed)"
+            return True, "Success (Audio Re-muxed via AC3)"
     except subprocess.CalledProcessError as e:
         logger.warning(f"FFmpeg Remux Attempt 2 failed: {e.stderr[:300]}")
         err2 = e.stderr
@@ -103,7 +106,9 @@ def remux_video_and_audio(
             "-i", str(input_video),
             "-i", str(input_audio),
             "-c:v", "copy",
-            "-c:a", "aac", "-b:a", "192k",
+            "-c:a", "aac",
+            "-strict", "-2",
+            "-b:a", "192k",
             "-map", "0:v:0",
             "-map", "1:a:0",
             str(alt_output)
