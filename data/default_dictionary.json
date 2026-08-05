@@ -31,6 +31,15 @@
       "replacement": "(طوط)"
     },
     {
+      "id": "106",
+      "term": "god",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
       "id": "1",
       "term": "gods",
       "language": "en",
