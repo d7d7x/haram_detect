@@ -56,6 +56,21 @@ class StremioTabFrame(ctk.CTkFrame if HAS_CTK else tk.Frame):
         p_lbl = ctk.CTkLabel(card, text=f"Playback Engine: {p_status}", font=("Segoe UI", 11), text_color=p_color) if HAS_CTK else tk.Label(card, text=f"Playback Engine: {p_status}", fg=p_color, font=("Segoe UI", 9))
         p_lbl.pack(anchor="w", pady=4)
 
+        # Solution Selection Frame
+        sol_frame = ctk.CTkFrame(self) if HAS_CTK else tk.LabelFrame(self, text="Engine Solution Selection", padx=10, pady=5)
+        sol_frame.pack(fill="x", padx=15, pady=5)
+
+        s_lbl = ctk.CTkLabel(sol_frame, text="Active Engine Solution:") if HAS_CTK else tk.Label(sol_frame, text="Active Engine Solution:")
+        s_lbl.pack(side="left", padx=10)
+
+        self.solution_var = tk.StringVar(value="solution_1")
+        if HAS_CTK:
+            ctk.CTkRadioButton(sol_frame, text="⚡ Solution 1: Live In-Place Engine (Instant Playback)", variable=self.solution_var, value="solution_1").pack(side="left", padx=10)
+            ctk.CTkRadioButton(sol_frame, text="🎬 Solution 2: Full FFmpeg Re-Muxing Engine (Permanent Video File)", variable=self.solution_var, value="solution_2").pack(side="left", padx=10)
+        else:
+            tk.Radiobutton(sol_frame, text="⚡ Solution 1: Live In-Place Engine", variable=self.solution_var, value="solution_1").pack(side="left", padx=10)
+            tk.Radiobutton(sol_frame, text="🎬 Solution 2: Full FFmpeg Re-Muxing Engine", variable=self.solution_var, value="solution_2").pack(side="left", padx=10)
+
         # Toggle Button Bar
         action_frame = ctk.CTkFrame(self) if HAS_CTK else tk.Frame(self)
         action_frame.pack(fill="x", padx=15, pady=10)
@@ -136,31 +151,39 @@ class StremioTabFrame(ctk.CTkFrame if HAS_CTK else tk.Frame):
             live_bleeper = LiveAudioBleeper()
 
             def on_stremio_file(file_path: Path):
-                self.log(f"[STREMIO DETECTED] File: {file_path.name}")
+                selected_solution = self.solution_var.get()
+                self.log(f"[STREMIO DETECTED] File: {file_path.name} (Active Solution: {selected_solution.upper()})")
 
-                # If subtitle file, modify directly in-place instantly!
-                if file_path.suffix.lower() in [".srt", ".vtt", ".ass"]:
-                    success = live_sub_modifier.process_subtitle_in_place(file_path)
-                    if success:
-                        self.log(f"[IN-PLACE SUBTITLE CLEANED] Modified {file_path.name} directly in Stremio cache!")
-                        # Extract timestamps for live audio bleeping
-                        items = self.processor.sub_engine.parse_subtitle(file_path)
-                        timestamps = [(it.start_sec, it.end_sec) for it in items if self.dictionary.find_matches(it.text)]
-                        if timestamps:
-                            live_bleeper.schedule_bleeps_for_timestamps(timestamps)
-                    return
+                if selected_solution == "solution_1":
+                    # Solution 1: Live In-Place Subtitle & Real-time Audio Bleep Engine
+                    if file_path.suffix.lower() in [".srt", ".vtt", ".ass"]:
+                        success = live_sub_modifier.process_subtitle_in_place(file_path)
+                        if success:
+                            self.log(f"[SOLUTION 1 IN-PLACE CLEANED] Modified {file_path.name} directly in Stremio cache!")
+                            items = self.processor.sub_engine.parse_subtitle(file_path)
+                            timestamps = [(it.start_sec, it.end_sec) for it in items if self.dictionary.find_matches(it.text)]
+                            if timestamps:
+                                live_bleeper.schedule_bleeps_for_timestamps(timestamps)
+                        return
+                    elif file_path.suffix.lower() in [".mp4", ".mkv", ".avi"]:
+                        # Also check if accompanying subtitle file exists in cache
+                        for ext in [".srt", ".vtt", ".ass"]:
+                            cand = file_path.with_suffix(ext)
+                            if cand.exists():
+                                live_sub_modifier.process_subtitle_in_place(cand)
 
-                # If video file, run media processor
-                try:
-                    res = self.processor.process(
-                        video_path=file_path,
-                        progress_callback=lambda pct, txt: self.log(f"[{file_path.name}] {txt}")
-                    )
-                    out_vid = Path(res['output_video'])
-                    self.log(f"[SUCCESS] Cleaned Stremio episode -> {out_vid.name}")
-
-                except Exception as e:
-                    self.log(f"[ERROR] Failed censoring Stremio episode {file_path.name}: {e}")
+                else:
+                    # Solution 2: Full FFmpeg Video Re-Muxing Engine (Previous Solution)
+                    if file_path.suffix.lower() in [".mp4", ".mkv", ".avi"]:
+                        try:
+                            res = self.processor.process(
+                                video_path=file_path,
+                                progress_callback=lambda pct, txt: self.log(f"[{file_path.name}] {txt}")
+                            )
+                            out_vid = Path(res['output_video'])
+                            self.log(f"[SOLUTION 2 SUCCESS] Permanent Censored Video Saved -> {out_vid.name}")
+                        except Exception as e:
+                            self.log(f"[SOLUTION 2 ERROR] Re-muxing error: {e}")
 
             self.watcher = WatcherService(watch_dir=cache_dir, callback=on_stremio_file)
             self.watcher.start()
