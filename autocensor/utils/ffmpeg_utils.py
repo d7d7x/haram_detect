@@ -41,47 +41,56 @@ def remux_video_and_audio(
     Optionally embed or attach subtitle.
     """
     output_video.parent.mkdir(parents=True, exist_ok=True)
+    
+    sub_codec = "mov_text" if output_video.suffix.lower() in [".mp4", ".m4v"] else "srt"
+
     cmd = [
         "ffmpeg", "-y",
         "-i", str(input_video),
         "-i", str(input_audio),
-        "-c:v", "copy",                # Ultra fast video copy without quality loss
-        "-c:a", "aac",                 # Fast AAC audio encoding
-        "-b:a", "192k",
-        "-map", "0:v:0",               # Map video from input 0
-        "-map", "1:a:0"                # Map audio from input 1 (censored audio)
     ]
-    
+
     if subtitle_file and subtitle_file.exists():
+        cmd.extend(["-i", str(subtitle_file)])
         cmd.extend([
-            "-i", str(subtitle_file),
-            "-map", "2:s:0?",
-            "-c:s", "mov_text" if output_video.suffix.lower() == ".mp4" else "copy",
-            "-metadata:s:s:0", "language=ara"
+            "-c:v", "copy",
+            "-c:a", "aac", "-b:a", "192k",
+            "-c:s", sub_codec,
+            "-map", "0:v:0",
+            "-map", "1:a:0",
+            "-map", "2:s:0?"
         ])
-    
+    else:
+        cmd.extend([
+            "-c:v", "copy",
+            "-c:a", "aac", "-b:a", "192k",
+            "-map", "0:v:0",
+            "-map", "1:a:0"
+        ])
+
     cmd.append(str(output_video))
 
     try:
         res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-        return output_video.exists()
+        return output_video.exists() and output_video.stat().st_size > 0
     except subprocess.CalledProcessError as e:
-        logger.error(f"FFmpeg remuxing failed: {e.stderr}")
-        # Fallback to simple audio swap without subtitle embedding if subtitle mapping failed
-        if subtitle_file:
-            fallback_cmd = [
-                "ffmpeg", "-y",
-                "-i", str(input_video),
-                "-i", str(input_audio),
-                "-c:v", "copy",
-                "-c:a", "aac",
-                "-map", "0:v:0",
-                "-map", "1:a:0",
-                str(output_video)
-            ]
-            try:
-                subprocess.run(fallback_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-                return output_video.exists()
-            except Exception as ex:
-                logger.error(f"Fallback remuxing also failed: {ex}")
-        return False
+        logger.error(f"FFmpeg primary remuxing failed: {e.stderr}")
+        
+        # Fallback 1: Simple video + audio swap without subtitle stream mapping
+        fallback_cmd = [
+            "ffmpeg", "-y",
+            "-i", str(input_video),
+            "-i", str(input_audio),
+            "-c:v", "copy",
+            "-c:a", "aac", "-b:a", "192k",
+            "-map", "0:v:0",
+            "-map", "1:a:0",
+            str(output_video)
+        ]
+        try:
+            subprocess.run(fallback_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+            return output_video.exists() and output_video.stat().st_size > 0
+        except subprocess.CalledProcessError as ex:
+            logger.error(f"FFmpeg fallback remuxing failed: {ex.stderr}")
+
+    return False

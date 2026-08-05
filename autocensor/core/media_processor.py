@@ -48,9 +48,14 @@ class MediaProcessor:
             raise RuntimeError("FFmpeg is not installed or not in PATH. Please install FFmpeg.")
 
         if output_video_path is None:
-            stem = video_path.stem
-            ext = video_path.suffix
-            output_video_path = video_path.parent / f"{stem}_Censored{ext}"
+            clean_stem = "".join([c if c.isalnum() or c in " ._-" else "_" for c in video_path.stem])
+            ext = video_path.suffix.lower() if video_path.suffix else ".mp4"
+            if "stremio-cache" in str(video_path).lower():
+                out_dir = Path.home() / "Downloads"
+            else:
+                out_dir = video_path.parent
+            out_dir.mkdir(parents=True, exist_ok=True)
+            output_video_path = out_dir / f"{clean_stem}_Censored{ext}"
 
         output_sub_path = output_video_path.with_suffix(".srt")
 
