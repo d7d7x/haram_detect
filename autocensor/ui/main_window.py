@@ -3,7 +3,7 @@ import sys
 import time
 import threading
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, filedialog, messagebox
 import logging
 from pathlib import Path
 
@@ -31,8 +31,8 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("AutoCensor AI - Direct Stremio Censorship Engine")
-        self.geometry("860x640")
-        self.minsize(820, 560)
+        self.geometry("860x660")
+        self.minsize(820, 580)
 
         # Initialize Core Engines
         self.dictionary = CensorshipDictionary()
@@ -52,7 +52,7 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
 
         self.create_header()
         self.create_main_hero()
-        self.create_solutions_guide()
+        self.create_mode_selection_buttons()
         self.create_activity_log()
         self.create_statusbar()
 
@@ -90,13 +90,13 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
 
     def create_main_hero(self):
         hero_card = ctk.CTkFrame(self, fg_color=THEME["surface"], corner_radius=15) if HAS_CTK else tk.LabelFrame(self, text="Main Control", padx=20, pady=20)
-        hero_card.pack(fill="x", padx=20, pady=12)
+        hero_card.pack(fill="x", padx=20, pady=10)
 
         self.status_lbl = ctk.CTkLabel(
             hero_card, text="🟢 AUTO-CENSOR ACTIVE (MONITORING STREMIO)",
             font=("Segoe UI", 14, "bold"), text_color="#10b981"
         ) if HAS_CTK else tk.Label(hero_card, text="🟢 AUTO-CENSOR ACTIVE (MONITORING STREMIO)", fg="#10b981", font=("Segoe UI", 12, "bold"))
-        self.status_lbl.pack(pady=(12, 4))
+        self.status_lbl.pack(pady=(10, 2))
 
         self.episode_lbl = ctk.CTkLabel(
             hero_card, text="🎬 Stremio Status: Standby (Play any episode in Stremio)",
@@ -104,29 +104,70 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
         ) if HAS_CTK else tk.Label(hero_card, text="🎬 Stremio Status: Standby (Play any episode in Stremio)", fg="#94a3b8", font=("Segoe UI", 10))
         self.episode_lbl.pack(pady=(0, 10))
 
-        self.main_toggle_btn = ctk.CTkButton(
-            hero_card, text="⏹ Stop Auto-Censor",
-            fg_color="#ef4444", hover_color="#dc2626",
-            font=("Segoe UI", 15, "bold"), height=42, width=320,
-            corner_radius=21, command=self.toggle_master_watcher
-        ) if HAS_CTK else tk.Button(hero_card, text="⏹ Stop Auto-Censor", bg="#ef4444", fg="white", font=("Segoe UI", 12, "bold"), command=self.toggle_master_watcher)
-        self.main_toggle_btn.pack(pady=(0, 10))
+    def create_mode_selection_buttons(self):
+        """Displays 2 clickable mode selection buttons so the user can easily pick."""
+        mode_card = ctk.CTkFrame(self, fg_color=THEME["surface"], corner_radius=12) if HAS_CTK else tk.LabelFrame(self, text="Select Censorship Mode", padx=15, pady=10)
+        mode_card.pack(fill="x", padx=20, pady=(0, 10))
 
-    def create_solutions_guide(self):
-        """Displays direct usage instructions inside the main UI card."""
-        guide_card = ctk.CTkFrame(self, fg_color=THEME["surface"], corner_radius=12) if HAS_CTK else tk.LabelFrame(self, text="Censorship Solutions Guide", padx=15, pady=10)
-        guide_card.pack(fill="x", padx=20, pady=(0, 10))
+        t_lbl = ctk.CTkLabel(mode_card, text="👇 Click to Choose Your Mode:", font=("Segoe UI", 12, "bold"), text_color="#10b981") if HAS_CTK else tk.Label(mode_card, text="👇 Click to Choose Your Mode:", font=("Segoe UI", 10, "bold"), fg="#10b981", bg="#1e293b")
+        t_lbl.pack(anchor="w", padx=5, pady=(4, 6))
 
-        t_lbl = ctk.CTkLabel(guide_card, text="💡 Quick Censorship Solutions:", font=("Segoe UI", 12, "bold"), text_color="#10b981") if HAS_CTK else tk.Label(guide_card, text="💡 Quick Censorship Solutions:", font=("Segoe UI", 10, "bold"), fg="#10b981", bg="#1e293b")
-        t_lbl.pack(anchor="w", padx=5, pady=(4, 2))
+        btn_row = ctk.CTkFrame(mode_card, fg_color="transparent") if HAS_CTK else tk.Frame(mode_card, bg="#1e293b")
+        btn_row.pack(fill="x", padx=5, pady=4)
 
-        s1_text = "⚡ Solution 1 (Live Stremio Watcher): In Stremio, click 💬 icon -> Select 2nd English or Arabic subtitle. AutoCensor deletes forbidden terms live!"
-        s1_lbl = ctk.CTkLabel(guide_card, text=s1_text, font=("Segoe UI", 11), text_color="#f8fafc", justify="left") if HAS_CTK else tk.Label(guide_card, text=s1_text, font=("Segoe UI", 9), fg="#f8fafc", bg="#1e293b")
-        s1_lbl.pack(anchor="w", padx=5, pady=2)
+        self.m1_btn = ctk.CTkButton(
+            btn_row, text="⚡ Mode 1: Live Stremio Watcher\n(Watch live in Stremio)",
+            fg_color="#10b981", hover_color="#059669",
+            font=("Segoe UI", 12, "bold"), height=52, width=380,
+            command=self.select_mode_1_live
+        ) if HAS_CTK else tk.Button(btn_row, text="⚡ Mode 1: Live Stremio Watcher", bg="#10b981", fg="white", font=("Segoe UI", 10, "bold"), command=self.select_mode_1_live)
+        self.m1_btn.pack(side="left", padx=5, expand=True, fill="x")
 
-        s2_text = "🎬 Solution 2 (Download & Censor): Click 3 dots ⋮ in Stremio -> 'Download this video'. AutoCensor auto-mutes audio & cleans subtitles into a new _Censored.mp4 file!"
-        s2_lbl = ctk.CTkLabel(guide_card, text=s2_text, font=("Segoe UI", 11), text_color="#cbd5e1", justify="left") if HAS_CTK else tk.Label(guide_card, text=s2_text, font=("Segoe UI", 9), fg="#cbd5e1", bg="#1e293b")
-        s2_lbl.pack(anchor="w", padx=5, pady=2)
+        self.m2_btn = ctk.CTkButton(
+            btn_row, text="🎬 Mode 2: Download & Process Video\n(Full Audio Muting + Clean Video)",
+            fg_color="#6366f1", hover_color="#4f46e5",
+            font=("Segoe UI", 12, "bold"), height=52, width=380,
+            command=self.select_mode_2_offline
+        ) if HAS_CTK else tk.Button(btn_row, text="🎬 Mode 2: Download & Process Video", bg="#6366f1", fg="white", font=("Segoe UI", 10, "bold"), command=self.select_mode_2_offline)
+        self.m2_btn.pack(side="right", padx=5, expand=True, fill="x")
+
+    def select_mode_1_live(self):
+        """Activates Live Stremio Watcher Mode."""
+        self.toggle_master_watcher(start_only=True)
+        self.log("✅ [MODE 1 SELECTED] Live Stremio Watcher active! Go to Stremio -> Click 💬 -> Select 2nd English or Arabic subtitle.")
+        messagebox.showinfo(
+            "Mode 1 Active",
+            "Mode 1 (Live Stremio Watcher) is now active!\n\n"
+            "Steps in Stremio:\n"
+            "1. Play your video in Stremio.\n"
+            "2. Click the Subtitle icon (💬).\n"
+            "3. Pick the 2nd 'English' or 'Arabic' subtitle.\n"
+            "4. AutoCensor will delete forbidden words live!"
+        )
+
+    def select_mode_2_offline(self):
+        """Pick a video file for full offline censorship (subtitles + audio muting)."""
+        filename = filedialog.askopenfilename(
+            title="Select Video File to Censor (from Stremio Download or PC)",
+            filetypes=[("Video Files", "*.mp4 *.mkv *.avi *.mov"), ("All Files", "*.*")]
+        )
+        if filename:
+            video_p = Path(filename)
+            self.log(f"🎬 [MODE 2 SELECTED] Processing video file for full audio muting & subtitle censorship: {video_p.name}")
+            def _process_bg():
+                try:
+                    res = self.processor.process(
+                        video_path=video_p,
+                        progress_callback=lambda pct, txt: self.log(f"[{int(pct*100)}%] {txt}")
+                    )
+                    out_v = res.get("output_video", "")
+                    self.log(f"🎉 SUCCESS! Censored video created: {Path(out_v).name}")
+                    self.after(0, lambda: messagebox.showinfo("Censorship Complete", f"Successfully created censored video file:\n{out_v}"))
+                except Exception as e:
+                    self.log(f"❌ Error processing file: {e}")
+                    self.after(0, lambda: messagebox.showerror("Processing Error", str(e)))
+
+            threading.Thread(target=_process_bg, daemon=True).start()
 
     def create_activity_log(self):
         log_card = ctk.CTkFrame(self, fg_color=THEME["surface"]) if HAS_CTK else tk.LabelFrame(self, text="Live Activity Log", padx=10, pady=10)
@@ -142,7 +183,7 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
         self.log_list.pack(side="left", fill="both", expand=True, padx=(10, 0), pady=5)
         log_scroll.pack(side="right", fill="y", padx=(0, 10), pady=5)
 
-        self.log("⚡ AutoCensor AI ready. Monitoring Stremio cache directly...")
+        self.log("⚡ AutoCensor AI ready. Click Mode 1 or Mode 2 above!")
 
     def create_statusbar(self):
         sb_frame = ctk.CTkFrame(self, height=28, fg_color=THEME["surface_light"]) if HAS_CTK else tk.Frame(self, bg="#334155", height=24)
@@ -170,10 +211,8 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
             self.watcher = None
             if HAS_CTK:
                 self.status_lbl.configure(text="🔴 AUTO-CENSOR STOPPED", text_color="#ef4444")
-                self.main_toggle_btn.configure(text="▶ START AUTO-CENSOR NOW", fg_color="#10b981", hover_color="#059669")
             else:
                 self.status_lbl.configure(text="🔴 AUTO-CENSOR STOPPED", fg="#ef4444")
-                self.main_toggle_btn.configure(text="▶ START AUTO-CENSOR NOW", bg="#10b981", fg="white")
             self.log("Auto-Censor service stopped.")
         else:
             cache_dir = get_stremio_cache_dir()
@@ -202,10 +241,8 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
 
             if HAS_CTK:
                 self.status_lbl.configure(text="🟢 AUTO-CENSOR ACTIVE (MONITORING STREMIO)", text_color="#10b981")
-                self.main_toggle_btn.configure(text="⏹ STOP AUTO-CENSOR", fg_color="#ef4444", hover_color="#dc2626")
             else:
                 self.status_lbl.configure(text="🟢 AUTO-CENSOR ACTIVE (MONITORING STREMIO)", fg="#10b981")
-                self.main_toggle_btn.configure(text="⏹ STOP AUTO-CENSOR", bg="#ef4444", fg="white")
             
             self.log(f"Monitoring active on Stremio cache: {cache_dir}")
 
