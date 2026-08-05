@@ -64,7 +64,7 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
 
     def create_tabs(self):
         if HAS_CTK:
-            self.tabview = ctk.CTkTabView(self, fg_color=THEME["surface"])
+            self.tabview = ctk.CTkTabview(self, fg_color=THEME["surface"])
             self.tabview.pack(fill="both", expand=True, padx=15, pady=10)
 
             self.tabview.add("Media Processing")
