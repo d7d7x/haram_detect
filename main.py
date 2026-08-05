@@ -5,7 +5,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 def main():
-    cli_flags = {"--cli", "--stremio", "-i", "--input", "-w", "--watch", "-h", "--help", "--mpv"}
+    cli_flags = {"--cli", "--stremio", "-i", "--input", "-w", "--watch", "-h", "--help"}
     if any(arg in cli_flags for arg in sys.argv[1:]):
         from autocensor.cli import run_cli
         if "--cli" in sys.argv:

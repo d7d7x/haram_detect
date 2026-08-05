@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 STREMIO_SERVER_URL = "http://127.0.0.1:11470"
 
 def get_stremio_cache_dir() -> Optional[Path]:
-    r"""Find Stremio cache directory across all possible user drive configurations."""
+    r"""Find Stremio cache directory across all possible user drive configurations (prioritizing G:\stremio-cache)."""
     candidates = [
         Path("G:/stremio-cache"),
         Path("G:/stremio-server/stremio-cache")
@@ -78,74 +78,6 @@ def get_active_stremio_stream_info() -> Optional[Dict[str, Any]]:
                         }
     except Exception as e:
         logger.debug(f"Stremio server query: {e}")
-    return None
-
-def find_mpv_executable() -> Optional[Path]:
-    """Find MPV executable on system across project data, PATH, and Windows install paths."""
-    # Check internal portable MPV location first
-    project_root = Path(__file__).resolve().parent.parent.parent
-    internal_mpv = project_root / "data" / "mpv" / "mpv.exe"
-    if internal_mpv.exists():
-        return internal_mpv
-
-    # Check PATH environment variable
-    mpv = shutil.which("mpv") or shutil.which("mpv.exe")
-    if mpv:
-        return Path(mpv)
-
-    if sys.platform == "win32":
-        user_profile = os.getenv("USERPROFILE", "")
-        local_app_data = os.getenv("LOCALAPPDATA", "")
-        app_data = os.getenv("APPDATA", "")
-
-        candidates = [
-            Path("C:/Program Files/mpv/mpv.exe"),
-            Path("C:/Program Files (x86)/mpv/mpv.exe"),
-            Path("C:/Program Files/mpv.net/mpvnet.exe"),
-            Path("C:/Program Files/mpv.net/mpv.exe"),
-            Path("C:/mpv/mpv.exe"),
-            Path("C:/mpv-x86_64/mpv.exe"),
-            Path(local_app_data) / "Programs" / "mpv" / "mpv.exe",
-            Path(local_app_data) / "Programs" / "shinchiro.mpv" / "mpv.exe",
-            Path(user_profile) / "scoop" / "apps" / "mpv" / "current" / "mpv.exe",
-            Path("C:/ProgramData/chocolatey/bin/mpv.exe"),
-            Path(app_data) / "stremio" / "mpv.exe",
-        ]
-
-        for p in candidates:
-            if str(p) and p.exists():
-                return p
-
-        # Search drive C:\Program Files recursively for mpv.exe if not found above
-        try:
-            pf = Path("C:/Program Files")
-            if pf.exists():
-                for found in pf.glob("**/mpv.exe"):
-                    return found
-        except Exception:
-            pass
-
-    return None
-
-def find_external_player() -> Optional[Path]:
-    """Find external player executable (prefer MPV for IPC support, fallback VLC)."""
-    mpv = find_mpv_executable()
-    if mpv:
-        return mpv
-
-    vlc = shutil.which("vlc") or shutil.which("vlc.exe")
-    if vlc:
-        return Path(vlc)
-
-    if sys.platform == "win32":
-        vlc_paths = [
-            Path("C:/Program Files/VideoLAN/VLC/vlc.exe"),
-            Path("C:/Program Files (x86)/VideoLAN/VLC/vlc.exe")
-        ]
-        for p in vlc_paths:
-            if p.exists():
-                return p
-
     return None
 
 def locate_subtitle_candidates_in_cache(cache_dir: Optional[Path] = None) -> List[Path]:

@@ -12,23 +12,20 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("AutoCensorCLI")
 
 def run_cli(args_list=None):
-    parser = argparse.ArgumentParser(description="AutoCensor AI - Automated Subtitle & Audio Censorship CLI (MPV IPC Ready)")
+    parser = argparse.ArgumentParser(description="AutoCensor AI - Automated Subtitle & Audio Censorship CLI")
     parser.add_argument("--input", "-i", type=str, help="Path to input video file or stream URL")
     parser.add_argument("--output", "-o", type=str, help="Path to output censored video file")
     parser.add_argument("--subtitle", "-s", type=str, help="Path to subtitle file (.srt, .ass, .vtt)")
     parser.add_argument("--mode", "-m", choices=[MODE_BEEP, MODE_MUTE, MODE_SUBTITLE_ONLY], default=MODE_MUTE, help="Censorship mode (default: mute)")
     parser.add_argument("--watch", "-w", type=str, help="Path to folder to monitor in background Watcher Mode")
-    parser.add_argument("--stremio", type=str, help="Path or URL passed from Stremio external player invocation")
-    parser.add_argument("--mpv", action="store_true", help="Launch live MPV JSON IPC playback for input stream/file")
-    parser.add_argument("--player", type=str, help="Custom path to mpv.exe executable")
+    parser.add_argument("--stremio", type=str, help="Path or URL passed from Stremio invocation")
     parser.add_argument("--dictionary", "-d", type=str, help="Path to custom dictionary JSON file")
 
     args = parser.parse_args(args_list)
 
-    if args.stremio or (args.input and args.mpv):
-        target_stream = args.stremio or args.input
+    if args.stremio:
         from autocensor.stremio_proxy import handle_stremio_stream
-        handle_stremio_stream(target_stream, player_path=args.player)
+        handle_stremio_stream(args.stremio)
         sys.exit(0)
 
     dict_path = Path(args.dictionary) if args.dictionary else None
