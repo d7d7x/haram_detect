@@ -3,7 +3,7 @@ import shutil
 import json
 import logging
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -35,49 +35,70 @@ def remux_video_and_audio(
     input_audio: Path,
     output_video: Path,
     subtitle_file: Optional[Path] = None
-) -> bool:
+) -> Tuple[bool, str]:
     """
-    Re-mux video with new audio track without re-encoding video stream (-c:v copy).
-    Optionally embed or attach subtitle.
+    Re-mux video with new audio track using robust fallbacks.
+    Returns (success: bool, error_message: str).
     """
     output_video.parent.mkdir(parents=True, exist_ok=True)
-    
-    sub_codec = "mov_text" if output_video.suffix.lower() in [".mp4", ".m4v"] else "srt"
 
-    cmd = [
+    # Clean existing file if present
+    if output_video.exists():
+        try:
+            os.remove(output_video)
+        except Exception:
+            pass
+
+    # Try Attempt 1: Fast stream copy + AAC audio
+    cmd1 = [
         "ffmpeg", "-y",
         "-i", str(input_video),
         "-i", str(input_audio),
+        "-c:v", "copy",
+        "-c:a", "aac", "-b:a", "192k",
+        "-map", "0:v:0",
+        "-map", "1:a:0"
     ]
-
     if subtitle_file and subtitle_file.exists():
-        cmd.extend(["-i", str(subtitle_file)])
-        cmd.extend([
-            "-c:v", "copy",
-            "-c:a", "aac", "-b:a", "192k",
+        sub_codec = "mov_text" if output_video.suffix.lower() in [".mp4", ".m4v"] else "srt"
+        cmd1.extend([
+            "-i", str(subtitle_file),
             "-c:s", sub_codec,
-            "-map", "0:v:0",
-            "-map", "1:a:0",
             "-map", "2:s:0?"
         ])
-    else:
-        cmd.extend([
-            "-c:v", "copy",
-            "-c:a", "aac", "-b:a", "192k",
-            "-map", "0:v:0",
-            "-map", "1:a:0"
-        ])
-
-    cmd.append(str(output_video))
+    cmd1.append(str(output_video))
 
     try:
-        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-        return output_video.exists() and output_video.stat().st_size > 0
+        res = subprocess.run(cmd1, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+        if output_video.exists() and output_video.stat().st_size > 0:
+            return True, "Success"
     except subprocess.CalledProcessError as e:
-        logger.error(f"FFmpeg primary remuxing failed: {e.stderr}")
-        
-        # Fallback 1: Simple video + audio swap without subtitle stream mapping
-        fallback_cmd = [
+        logger.warning(f"FFmpeg Remux Attempt 1 failed: {e.stderr[:300]}")
+        err1 = e.stderr
+
+    # Try Attempt 2: Audio swap without subtitle stream mapping
+    cmd2 = [
+        "ffmpeg", "-y",
+        "-i", str(input_video),
+        "-i", str(input_audio),
+        "-c:v", "copy",
+        "-c:a", "aac", "-b:a", "192k",
+        "-map", "0:v:0",
+        "-map", "1:a:0",
+        str(output_video)
+    ]
+    try:
+        res = subprocess.run(cmd2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+        if output_video.exists() and output_video.stat().st_size > 0:
+            return True, "Success (Audio Re-muxed)"
+    except subprocess.CalledProcessError as e:
+        logger.warning(f"FFmpeg Remux Attempt 2 failed: {e.stderr[:300]}")
+        err2 = e.stderr
+
+    # Try Attempt 3: Change container format to .mkv if .mp4 failed
+    if output_video.suffix.lower() == ".mp4":
+        alt_output = output_video.with_suffix(".mkv")
+        cmd3 = [
             "ffmpeg", "-y",
             "-i", str(input_video),
             "-i", str(input_audio),
@@ -85,12 +106,14 @@ def remux_video_and_audio(
             "-c:a", "aac", "-b:a", "192k",
             "-map", "0:v:0",
             "-map", "1:a:0",
-            str(output_video)
+            str(alt_output)
         ]
         try:
-            subprocess.run(fallback_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
-            return output_video.exists() and output_video.stat().st_size > 0
-        except subprocess.CalledProcessError as ex:
-            logger.error(f"FFmpeg fallback remuxing failed: {ex.stderr}")
+            res = subprocess.run(cmd3, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+            if alt_output.exists() and alt_output.stat().st_size > 0:
+                return True, f"Success (Saved as MKV: {alt_output.name})"
+        except subprocess.CalledProcessError as e:
+            logger.error(f"FFmpeg Remux Attempt 3 failed: {e.stderr[:300]}")
+            err2 = e.stderr
 
-    return False
+    return False, f"FFmpeg failed: {err2 if 'err2' in locals() else err1}"

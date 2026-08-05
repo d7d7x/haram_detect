@@ -145,12 +145,21 @@ class MediaProcessor:
 
         # Step 4: Re-mux video and audio into output video
         update_progress(0.90, "Re-muxing video and audio tracks (Fast stream copy)...")
-        remux_success = remux_video_and_audio(
+        remux_success, err_msg = remux_video_and_audio(
             input_video=video_path,
             input_audio=temp_audio_out,
             output_video=output_video_path,
             subtitle_file=output_sub_path if output_sub_path.exists() else None
         )
+
+        if not remux_success:
+            # Check if alternative MKV file was created
+            alt_mkv = output_video_path.with_suffix(".mkv")
+            if alt_mkv.exists() and alt_mkv.stat().st_size > 0:
+                output_video_path = alt_mkv
+                remux_success = True
+            else:
+                raise RuntimeError(f"Failed to re-mux output video: {err_msg}")
 
         in_place_sub = video_path.with_suffix(".srt")
         if output_sub_path.exists() and output_sub_path != in_place_sub:
