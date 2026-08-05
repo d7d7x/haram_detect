@@ -12,8 +12,14 @@ logger = logging.getLogger(__name__)
 STREMIO_SERVER_URL = "http://127.0.0.1:11470"
 
 def get_stremio_cache_dir() -> Optional[Path]:
-    """Find Stremio cache directory across all possible user drive configurations."""
+    """Find Stremio cache directory across all possible user drive configurations (prioritizing G: drive and workspace directory)."""
     candidates = []
+
+    # 1. Workspace directory & G: drive paths (High priority)
+    workspace_dir = Path(__file__).resolve().parent.parent.parent
+    candidates.append(workspace_dir / "stremio-cache")
+    candidates.append(Path("G:/stremio-cache"))
+    candidates.append(Path("G:/stremio-server/stremio-cache"))
 
     if sys.platform == "win32":
         user_profile = os.getenv("USERPROFILE")
@@ -33,16 +39,15 @@ def get_stremio_cache_dir() -> Optional[Path]:
     else:  # Linux
         candidates.append(Path.home() / ".stremio-server" / "stremio-cache")
 
-    # Return first candidate that exists or create default user profile cache path
+    # Return first candidate that exists
     for p in candidates:
         if p.exists():
             return p
 
-    # Fallback to creating/returning standard user profile cache directory
-    if sys.platform == "win32" and os.getenv("USERPROFILE"):
-        default_p = Path(os.getenv("USERPROFILE")) / "stremio-cache"
-        default_p.mkdir(parents=True, exist_ok=True)
-        return default_p
+    # If none exist yet, create and use the workspace cache directory in G:\
+    default_p = workspace_dir / "stremio-cache"
+    default_p.mkdir(parents=True, exist_ok=True)
+    return default_p
 
     return candidates[0] if candidates else None
 
