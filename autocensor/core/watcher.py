@@ -65,12 +65,19 @@ class WatcherService:
                 if event.is_directory:
                     return
                 p = Path(event.src_path)
-                if p.suffix.lower() in VIDEO_EXTENSIONS:
+                if p.suffix.lower() in VIDEO_EXTENSIONS or p.suffix.lower() in SUBTITLE_EXTENSIONS:
+                    service_self._on_new_media(p)
+
+            def on_modified(self, event):
+                if event.is_directory:
+                    return
+                p = Path(event.src_path)
+                if p.suffix.lower() in SUBTITLE_EXTENSIONS:
                     service_self._on_new_media(p)
 
         self._observer = Observer()
         handler = MediaEventHandler()
-        self._observer.schedule(handler, str(self.watch_dir), recursive=False)
+        self._observer.schedule(handler, str(self.watch_dir), recursive=True)
         self._observer.start()
 
     def _start_polling(self):
@@ -78,13 +85,13 @@ class WatcherService:
             logger.info("Watchdog not installed. Running background polling loop.")
             while self.is_running:
                 try:
-                    for item in self.watch_dir.iterdir():
-                        if item.is_file() and item.suffix.lower() in VIDEO_EXTENSIONS:
+                    for item in self.watch_dir.rglob("*"):
+                        if item.is_file() and (item.suffix.lower() in VIDEO_EXTENSIONS or item.suffix.lower() in SUBTITLE_EXTENSIONS):
                             if item not in self.processed_files:
                                 self._on_new_media(item)
                 except Exception as e:
                     logger.error(f"Polling loop error: {e}")
-                time.sleep(5)
+                time.sleep(2)
 
         self._thread = threading.Thread(target=poll_loop, daemon=True)
         self._thread.start()

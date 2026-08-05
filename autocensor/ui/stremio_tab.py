@@ -129,8 +129,28 @@ class StremioTabFrame(ctk.CTkFrame if HAS_CTK else tk.Frame):
                 messagebox.showwarning("Stremio Cache Missing", "Stremio cache directory was not found. Please launch Stremio and play a stream first.")
                 return
 
+            from autocensor.core.live_subtitle_modifier import LiveSubtitleModifier
+            from autocensor.core.live_audio_bleeper import LiveAudioBleeper
+
+            live_sub_modifier = LiveSubtitleModifier(self.dictionary)
+            live_bleeper = LiveAudioBleeper()
+
             def on_stremio_file(file_path: Path):
-                self.log(f"[STREMIO DETECTED] Episode file: {file_path.name}")
+                self.log(f"[STREMIO DETECTED] File: {file_path.name}")
+
+                # If subtitle file, modify directly in-place instantly!
+                if file_path.suffix.lower() in [".srt", ".vtt", ".ass"]:
+                    success = live_sub_modifier.process_subtitle_in_place(file_path)
+                    if success:
+                        self.log(f"[IN-PLACE SUBTITLE CLEANED] Modified {file_path.name} directly in Stremio cache!")
+                        # Extract timestamps for live audio bleeping
+                        items = self.processor.sub_engine.parse_subtitle(file_path)
+                        timestamps = [(it.start_sec, it.end_sec) for it in items if self.dictionary.find_matches(it.text)]
+                        if timestamps:
+                            live_bleeper.schedule_bleeps_for_timestamps(timestamps)
+                    return
+
+                # If video file, run media processor
                 try:
                     res = self.processor.process(
                         video_path=file_path,
@@ -138,14 +158,6 @@ class StremioTabFrame(ctk.CTkFrame if HAS_CTK else tk.Frame):
                     )
                     out_vid = Path(res['output_video'])
                     self.log(f"[SUCCESS] Cleaned Stremio episode -> {out_vid.name}")
-
-                    # Auto-open clean video player
-                    if out_vid.exists():
-                        self.log(f"[LAUNCH] Opening clean censored episode...")
-                        if sys.platform == "win32":
-                            os.startfile(str(out_vid))
-                        else:
-                            subprocess.Popen(["xdg-open", str(out_vid)])
 
                 except Exception as e:
                     self.log(f"[ERROR] Failed censoring Stremio episode {file_path.name}: {e}")
