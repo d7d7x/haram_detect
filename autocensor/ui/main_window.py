@@ -31,8 +31,8 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("AutoCensor AI - Direct Stremio Censorship Engine")
-        self.geometry("850x580")
-        self.minsize(800, 520)
+        self.geometry("860x640")
+        self.minsize(820, 560)
 
         # Initialize Core Engines
         self.dictionary = CensorshipDictionary()
@@ -52,6 +52,7 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
 
         self.create_header()
         self.create_main_hero()
+        self.create_solutions_guide()
         self.create_activity_log()
         self.create_statusbar()
 
@@ -89,31 +90,47 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
 
     def create_main_hero(self):
         hero_card = ctk.CTkFrame(self, fg_color=THEME["surface"], corner_radius=15) if HAS_CTK else tk.LabelFrame(self, text="Main Control", padx=20, pady=20)
-        hero_card.pack(fill="x", padx=20, pady=15)
+        hero_card.pack(fill="x", padx=20, pady=12)
 
         self.status_lbl = ctk.CTkLabel(
             hero_card, text="🟢 AUTO-CENSOR ACTIVE (MONITORING STREMIO)",
             font=("Segoe UI", 14, "bold"), text_color="#10b981"
         ) if HAS_CTK else tk.Label(hero_card, text="🟢 AUTO-CENSOR ACTIVE (MONITORING STREMIO)", fg="#10b981", font=("Segoe UI", 12, "bold"))
-        self.status_lbl.pack(pady=(15, 5))
+        self.status_lbl.pack(pady=(12, 4))
 
         self.episode_lbl = ctk.CTkLabel(
             hero_card, text="🎬 Stremio Status: Standby (Play any episode in Stremio)",
             font=("Segoe UI", 12), text_color="#94a3b8"
         ) if HAS_CTK else tk.Label(hero_card, text="🎬 Stremio Status: Standby (Play any episode in Stremio)", fg="#94a3b8", font=("Segoe UI", 10))
-        self.episode_lbl.pack(pady=(0, 15))
+        self.episode_lbl.pack(pady=(0, 10))
 
         self.main_toggle_btn = ctk.CTkButton(
             hero_card, text="⏹ Stop Auto-Censor",
             fg_color="#ef4444", hover_color="#dc2626",
-            font=("Segoe UI", 15, "bold"), height=48, width=320,
-            corner_radius=24, command=self.toggle_master_watcher
+            font=("Segoe UI", 15, "bold"), height=42, width=320,
+            corner_radius=21, command=self.toggle_master_watcher
         ) if HAS_CTK else tk.Button(hero_card, text="⏹ Stop Auto-Censor", bg="#ef4444", fg="white", font=("Segoe UI", 12, "bold"), command=self.toggle_master_watcher)
-        self.main_toggle_btn.pack(pady=(0, 15))
+        self.main_toggle_btn.pack(pady=(0, 10))
+
+    def create_solutions_guide(self):
+        """Displays direct usage instructions inside the main UI card."""
+        guide_card = ctk.CTkFrame(self, fg_color=THEME["surface"], corner_radius=12) if HAS_CTK else tk.LabelFrame(self, text="Censorship Solutions Guide", padx=15, pady=10)
+        guide_card.pack(fill="x", padx=20, pady=(0, 10))
+
+        t_lbl = ctk.CTkLabel(guide_card, text="💡 Quick Censorship Solutions:", font=("Segoe UI", 12, "bold"), text_color="#10b981") if HAS_CTK else tk.Label(guide_card, text="💡 Quick Censorship Solutions:", font=("Segoe UI", 10, "bold"), fg="#10b981", bg="#1e293b")
+        t_lbl.pack(anchor="w", padx=5, pady=(4, 2))
+
+        s1_text = "⚡ Solution 1 (Live Stremio Watcher): In Stremio, click 💬 icon -> Select 2nd English or Arabic subtitle. AutoCensor deletes forbidden terms live!"
+        s1_lbl = ctk.CTkLabel(guide_card, text=s1_text, font=("Segoe UI", 11), text_color="#f8fafc", justify="left") if HAS_CTK else tk.Label(guide_card, text=s1_text, font=("Segoe UI", 9), fg="#f8fafc", bg="#1e293b")
+        s1_lbl.pack(anchor="w", padx=5, pady=2)
+
+        s2_text = "🎬 Solution 2 (Download & Censor): Click 3 dots ⋮ in Stremio -> 'Download this video'. AutoCensor auto-mutes audio & cleans subtitles into a new _Censored.mp4 file!"
+        s2_lbl = ctk.CTkLabel(guide_card, text=s2_text, font=("Segoe UI", 11), text_color="#cbd5e1", justify="left") if HAS_CTK else tk.Label(guide_card, text=s2_text, font=("Segoe UI", 9), fg="#cbd5e1", bg="#1e293b")
+        s2_lbl.pack(anchor="w", padx=5, pady=2)
 
     def create_activity_log(self):
         log_card = ctk.CTkFrame(self, fg_color=THEME["surface"]) if HAS_CTK else tk.LabelFrame(self, text="Live Activity Log", padx=10, pady=10)
-        log_card.pack(fill="both", expand=True, padx=20, pady=(0, 15))
+        log_card.pack(fill="both", expand=True, padx=20, pady=(0, 10))
 
         lbl = ctk.CTkLabel(log_card, text="📋 Live Activity Log:", font=("Segoe UI", 11, "bold"), text_color="#94a3b8") if HAS_CTK else tk.Label(log_card, text="📋 Live Activity Log:", font=("Segoe UI", 9, "bold"))
         lbl.pack(anchor="w", padx=10, pady=(5, 2))
