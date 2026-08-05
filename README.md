@@ -38,7 +38,8 @@
 
 ```bash
 # Clone or navigate to the repository
-cd AutoCensorAI
+git clone https://github.com/d7d7x/haram_detect.git
+cd haram_detect
 
 # Create virtual environment (optional)
 python -m venv venv
@@ -82,7 +83,7 @@ python main.py --cli --watch "C:\Users\Username\Downloads" --mode beep
 ## 📁 Project Architecture
 
 ```
-AutoCensorAI/
+haram_detect/
 ├── autocensor/
 │   ├── config.py                 # Application settings and styling tokens
 │   ├── core/
@@ -107,3 +108,4 @@ AutoCensorAI/
 ├── main.py                       # Main application launcher
 └── README.md                     # Documentation
 ```
+
