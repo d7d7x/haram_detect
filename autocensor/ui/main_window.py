@@ -15,7 +15,7 @@ from autocensor.core.media_processor import MediaProcessor
 from autocensor.core.live_subtitle_modifier import LiveSubtitleModifier
 from autocensor.core.live_audio_bleeper import LiveAudioBleeper
 from autocensor.core.watcher import WatcherService
-from autocensor.utils.stremio_utils import get_stremio_cache_dir, find_external_player, get_active_stremio_stream_info
+from autocensor.utils.stremio_utils import get_stremio_cache_dir, find_external_player, find_mpv_executable, get_active_stremio_stream_info
 from autocensor.utils.ffmpeg_utils import is_ffmpeg_available
 
 logger = logging.getLogger(__name__)
@@ -32,8 +32,8 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("AutoCensor AI - 1-Click Stremio Censorship Engine")
-        self.geometry("850x580")
-        self.minsize(800, 520)
+        self.geometry("850x640")
+        self.minsize(800, 560)
 
         # Initialize Core Engines
         self.dictionary = CensorshipDictionary()
@@ -53,13 +53,14 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
 
         self.create_header()
         self.create_main_hero()
+        self.create_paste_launcher()
         self.create_activity_log()
         self.create_statusbar()
 
         # Start live Stremio API poller
         self.start_stremio_api_poller()
 
-        # Auto-start watcher on launch for maximum convenience!
+        # Auto-start watcher on launch
         self.after(500, self.auto_start_watcher)
 
     def create_header(self):
@@ -89,35 +90,99 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
         ver_lbl.pack(side="right", padx=20)
 
     def create_main_hero(self):
-        hero_card = ctk.CTkFrame(self, fg_color=THEME["surface"], corner_radius=15) if HAS_CTK else tk.LabelFrame(self, text="Main Control", padx=20, pady=20)
-        hero_card.pack(fill="x", padx=20, pady=15)
+        hero_card = ctk.CTkFrame(self, fg_color=THEME["surface"], corner_radius=15) if HAS_CTK else tk.LabelFrame(self, text="Main Control", padx=20, pady=15)
+        hero_card.pack(fill="x", padx=20, pady=(15, 5))
 
-        # Large Live Status Badge
         self.status_lbl = ctk.CTkLabel(
             hero_card, text="🟢 AUTO-CENSOR ACTIVE (MONITORING STREMIO)",
             font=("Segoe UI", 14, "bold"), text_color="#10b981"
         ) if HAS_CTK else tk.Label(hero_card, text="🟢 AUTO-CENSOR ACTIVE (MONITORING STREMIO)", fg="#10b981", font=("Segoe UI", 12, "bold"))
-        self.status_lbl.pack(pady=(15, 5))
+        self.status_lbl.pack(pady=(12, 4))
 
-        # Active Episode Live Detection Banner
         self.episode_lbl = ctk.CTkLabel(
             hero_card, text="🎬 Stremio Status: Standby (Play any episode in Stremio)",
             font=("Segoe UI", 12), text_color="#94a3b8"
         ) if HAS_CTK else tk.Label(hero_card, text="🎬 Stremio Status: Standby (Play any episode in Stremio)", fg="#94a3b8", font=("Segoe UI", 10))
-        self.episode_lbl.pack(pady=(0, 15))
+        self.episode_lbl.pack(pady=(0, 12))
 
-        # GIANT 1-CLICK TOGGLE BUTTON
         self.main_toggle_btn = ctk.CTkButton(
             hero_card, text="⏹ Stop Auto-Censor",
             fg_color="#ef4444", hover_color="#dc2626",
-            font=("Segoe UI", 15, "bold"), height=48, width=320,
-            corner_radius=24, command=self.toggle_master_watcher
+            font=("Segoe UI", 15, "bold"), height=44, width=320,
+            corner_radius=22, command=self.toggle_master_watcher
         ) if HAS_CTK else tk.Button(hero_card, text="⏹ Stop Auto-Censor", bg="#ef4444", fg="white", font=("Segoe UI", 12, "bold"), command=self.toggle_master_watcher)
-        self.main_toggle_btn.pack(pady=(0, 15))
+        self.main_toggle_btn.pack(pady=(0, 12))
+
+    def create_paste_launcher(self):
+        """Direct Stream Link / Magnet Launcher Section on Main Window."""
+        paste_card = ctk.CTkFrame(self, fg_color=THEME["surface"], corner_radius=15) if HAS_CTK else tk.LabelFrame(self, text="Paste Stream Link", padx=15, pady=10)
+        paste_card.pack(fill="x", padx=20, pady=5)
+
+        row = ctk.CTkFrame(paste_card, fg_color="transparent") if HAS_CTK else tk.Frame(paste_card, bg="#1e293b")
+        row.pack(fill="x", padx=10, pady=8)
+
+        lbl = ctk.CTkLabel(row, text="Paste Stream Link:", font=("Segoe UI", 11, "bold"), text_color="#f8fafc") if HAS_CTK else tk.Label(row, text="Paste Link:", font=("Segoe UI", 9, "bold"), fg="#f8fafc", bg="#1e293b")
+        lbl.pack(side="left", padx=(0, 10))
+
+        self.stream_url_var = tk.StringVar()
+        if HAS_CTK:
+            self.stream_url_entry = ctk.CTkEntry(
+                row, textvariable=self.stream_url_var,
+                placeholder_text="Paste copied Stremio stream link or magnet link here...",
+                height=36
+            )
+            self.stream_url_entry.pack(side="left", fill="x", expand=True, padx=5)
+
+            paste_btn = ctk.CTkButton(
+                row, text="📋 Paste", width=80, height=36,
+                fg_color="#334155", hover_color="#475569",
+                command=self.paste_stream_url
+            )
+            paste_btn.pack(side="left", padx=5)
+
+            play_btn = ctk.CTkButton(
+                row, text="🎬 Play in MPV", fg_color="#10b981", hover_color="#059669",
+                font=("Segoe UI", 12, "bold"), height=36, width=130,
+                command=self.play_pasted_stream
+            )
+            play_btn.pack(side="left", padx=5)
+        else:
+            self.stream_url_entry = tk.Entry(row, textvariable=self.stream_url_var, width=40)
+            self.stream_url_entry.pack(side="left", fill="x", expand=True, padx=5)
+
+            paste_btn = tk.Button(row, text="📋 Paste", command=self.paste_stream_url)
+            paste_btn.pack(side="left", padx=5)
+
+            play_btn = tk.Button(row, text="🎬 Play in MPV", bg="#10b981", fg="white", font=("Segoe UI", 10, "bold"), command=self.play_pasted_stream)
+            play_btn.pack(side="left", padx=5)
+
+    def paste_stream_url(self):
+        try:
+            txt = self.clipboard_get()
+            if txt:
+                self.stream_url_var.set(txt.strip())
+                self.log("Pasted link from clipboard!")
+        except Exception as e:
+            self.log(f"Clipboard paste notice: {e}")
+
+    def play_pasted_stream(self):
+        url = self.stream_url_var.get().strip()
+        if not url:
+            messagebox.showwarning("Missing Link", "Please paste a copied Stremio stream link or magnet link first.")
+            return
+
+        mpv_exe = find_mpv_executable()
+        self.log(f"Launching MPV IPC live censorship for link...")
+        from autocensor.stremio_proxy import handle_stremio_stream
+        threading.Thread(
+            target=handle_stremio_stream,
+            args=(url, str(mpv_exe) if mpv_exe else None),
+            daemon=True
+        ).start()
 
     def create_activity_log(self):
         log_card = ctk.CTkFrame(self, fg_color=THEME["surface"]) if HAS_CTK else tk.LabelFrame(self, text="Live Activity Log", padx=10, pady=10)
-        log_card.pack(fill="both", expand=True, padx=20, pady=(0, 15))
+        log_card.pack(fill="both", expand=True, padx=20, pady=(5, 10))
 
         lbl = ctk.CTkLabel(log_card, text="📋 Live Activity Log:", font=("Segoe UI", 11, "bold"), text_color="#94a3b8") if HAS_CTK else tk.Label(log_card, text="📋 Live Activity Log:", font=("Segoe UI", 9, "bold"))
         lbl.pack(anchor="w", padx=10, pady=(5, 2))
@@ -148,7 +213,6 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
         self.after(0, _add)
 
     def auto_start_watcher(self):
-        """Automatically start monitoring on app launch."""
         if not self.watcher or not self.watcher.is_running:
             self.toggle_master_watcher(start_only=True)
 
@@ -172,7 +236,6 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
             def on_media_file(file_path: Path):
                 self.log(f"[DETECTED] {file_path.name}")
                 
-                # In-place Subtitle Modification
                 if file_path.suffix.lower() in [".srt", ".vtt", ".ass"]:
                     success = self.live_sub_modifier.process_subtitle_in_place(file_path)
                     if success:
@@ -180,11 +243,10 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
                         items = self.processor.sub_engine.parse_subtitle(file_path)
                         timestamps = [(it.start_sec, it.end_sec) for it in items if self.dictionary.find_matches(it.text)]
                         if timestamps:
-                            self.log(f"[AUDIO BEEP SCHEDULED] Scheduled {len(timestamps)} (طوط) sound bleeps!")
+                            self.log(f"[AUDIO BEEP SCHEDULED] Scheduled {len(timestamps)} sound bleeps!")
                             self.live_bleeper.schedule_bleeps_for_timestamps(timestamps)
                     return
 
-                # Embedded Subtitle Extraction & Video File Processing
                 if file_path.suffix.lower() in [".mp4", ".mkv", ".avi"]:
                     extracted_srt = self.live_sub_modifier.extract_and_clean_embedded_subtitle(file_path)
                     target_sub = extracted_srt or file_path.with_suffix(".srt")
@@ -193,7 +255,7 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
                         items = self.processor.sub_engine.parse_subtitle(target_sub)
                         timestamps = [(it.start_sec, it.end_sec) for it in items if self.dictionary.find_matches(it.text)]
                         if timestamps:
-                            self.log(f"[AUDIO BEEP SCHEDULED] Scheduled {len(timestamps)} (طوط) sound bleeps!")
+                            self.log(f"[AUDIO BEEP SCHEDULED] Scheduled {len(timestamps)} sound bleeps!")
                             self.live_bleeper.schedule_bleeps_for_timestamps(timestamps)
 
             self.watcher = WatcherService(watch_dir=cache_dir, callback=on_media_file)
@@ -209,7 +271,6 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
             self.log(f"Monitoring active on: {cache_dir}")
 
     def start_stremio_api_poller(self):
-        """Background poller for Stremio live API (http://127.0.0.1:11470)."""
         def poll_loop():
             last_stream_name = None
             while self.is_polling:
