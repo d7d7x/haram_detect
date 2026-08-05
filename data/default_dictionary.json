@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "default_replacement_ar": "(طوط)",
   "default_replacement_en": "[BEEP]",
   "terms": [
@@ -14,60 +14,6 @@
     },
     {
       "id": "2",
-      "term": "demigod",
-      "language": "en",
-      "category": "Polytheism",
-      "match_type": "word",
-      "case_sensitive": false,
-      "replacement": "[BEEP]"
-    },
-    {
-      "id": "3",
-      "term": "demigods",
-      "language": "en",
-      "category": "Polytheism",
-      "match_type": "word",
-      "case_sensitive": false,
-      "replacement": "[BEEP]"
-    },
-    {
-      "id": "4",
-      "term": "kami",
-      "language": "en",
-      "category": "Polytheism",
-      "match_type": "word",
-      "case_sensitive": false,
-      "replacement": "[BEEP]"
-    },
-    {
-      "id": "5",
-      "term": "Zeus",
-      "language": "en",
-      "category": "Polytheism",
-      "match_type": "word",
-      "case_sensitive": false,
-      "replacement": "[BEEP]"
-    },
-    {
-      "id": "6",
-      "term": "Thor",
-      "language": "en",
-      "category": "Polytheism",
-      "match_type": "word",
-      "case_sensitive": false,
-      "replacement": "[BEEP]"
-    },
-    {
-      "id": "7",
-      "term": "Odin",
-      "language": "en",
-      "category": "Polytheism",
-      "match_type": "word",
-      "case_sensitive": false,
-      "replacement": "[BEEP]"
-    },
-    {
-      "id": "8",
       "term": "goddess",
       "language": "en",
       "category": "Polytheism",
@@ -76,7 +22,7 @@
       "replacement": "[BEEP]"
     },
     {
-      "id": "9",
+      "id": "3",
       "term": "goddesses",
       "language": "en",
       "category": "Polytheism",
@@ -85,7 +31,421 @@
       "replacement": "[BEEP]"
     },
     {
+      "id": "4",
+      "term": "demigod",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "5",
+      "term": "demigods",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "6",
+      "term": "deity",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "7",
+      "term": "deities",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "8",
+      "term": "kami",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "9",
+      "term": "pantheon",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
       "id": "10",
+      "term": "false god",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "11",
+      "term": "false gods",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "12",
+      "term": "pagan god",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "13",
+      "term": "pagan gods",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "14",
+      "term": "Zeus",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "15",
+      "term": "Thor",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "16",
+      "term": "Odin",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "17",
+      "term": "Poseidon",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "18",
+      "term": "Apollo",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "19",
+      "term": "Aphrodite",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "20",
+      "term": "Hera",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "21",
+      "term": "Ares",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "22",
+      "term": "Hades",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "23",
+      "term": "Hermes",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "24",
+      "term": "Dionysus",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "25",
+      "term": "Isis",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "26",
+      "term": "Osiris",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "27",
+      "term": "Horus",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "28",
+      "term": "Anubis",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "29",
+      "term": "Shiva",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "30",
+      "term": "Vishnu",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "31",
+      "term": "Brahma",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "32",
+      "term": "Buddha",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "33",
+      "term": "idol",
+      "language": "en",
+      "category": "Idolatry",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "34",
+      "term": "idols",
+      "language": "en",
+      "category": "Idolatry",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "35",
+      "term": "idolatry",
+      "language": "en",
+      "category": "Idolatry",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "36",
+      "term": "graven image",
+      "language": "en",
+      "category": "Idolatry",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "37",
+      "term": "oh my god",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "38",
+      "term": "oh my gods",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "39",
+      "term": "by the gods",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "40",
+      "term": "for the gods",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "41",
+      "term": "gods above",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "42",
+      "term": "gods below",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "43",
+      "term": "may the gods",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "44",
+      "term": "blessing of the gods",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "45",
+      "term": "wrath of the gods",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "46",
+      "term": "thank the gods",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "47",
+      "term": "gods help us",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "48",
+      "term": "praise the gods",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "49",
+      "term": "swear by the gods",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "50",
       "term": "آلهة",
       "language": "ar",
       "category": "Polytheism",
@@ -94,7 +454,7 @@
       "replacement": "(طوط)"
     },
     {
-      "id": "11",
+      "id": "51",
       "term": "الآلهة",
       "language": "ar",
       "category": "Polytheism",
@@ -103,7 +463,7 @@
       "replacement": "(طوط)"
     },
     {
-      "id": "12",
+      "id": "52",
       "term": "آلهتهم",
       "language": "ar",
       "category": "Polytheism",
@@ -112,8 +472,8 @@
       "replacement": "(طوط)"
     },
     {
-      "id": "13",
-      "term": "ربات",
+      "id": "53",
+      "term": "آلهتكم",
       "language": "ar",
       "category": "Polytheism",
       "match_type": "word",
@@ -121,7 +481,7 @@
       "replacement": "(طوط)"
     },
     {
-      "id": "14",
+      "id": "54",
       "term": "إلهة",
       "language": "ar",
       "category": "Polytheism",
@@ -130,35 +490,134 @@
       "replacement": "(طوط)"
     },
     {
-      "id": "15",
+      "id": "55",
+      "term": "ربات",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "56",
+      "term": "الربات",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "57",
+      "term": "إلهين",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "58",
       "term": "صنم",
       "language": "ar",
-      "category": "Polytheism",
+      "category": "Idolatry",
       "match_type": "word",
       "case_sensitive": false,
       "replacement": "(طوط)"
     },
     {
-      "id": "16",
+      "id": "59",
       "term": "أصنام",
       "language": "ar",
-      "category": "Polytheism",
+      "category": "Idolatry",
       "match_type": "word",
       "case_sensitive": false,
       "replacement": "(طوط)"
     },
     {
-      "id": "17",
+      "id": "60",
+      "term": "الأصنام",
+      "language": "ar",
+      "category": "Idolatry",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "61",
       "term": "وثن",
       "language": "ar",
-      "category": "Polytheism",
+      "category": "Idolatry",
       "match_type": "word",
       "case_sensitive": false,
       "replacement": "(طوط)"
     },
     {
-      "id": "18",
+      "id": "62",
       "term": "أوثان",
+      "language": "ar",
+      "category": "Idolatry",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "63",
+      "term": "الأوثان",
+      "language": "ar",
+      "category": "Idolatry",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "64",
+      "term": "أنصاب",
+      "language": "ar",
+      "category": "Idolatry",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "65",
+      "term": "الأنصاب",
+      "language": "ar",
+      "category": "Idolatry",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "66",
+      "term": "طاغوت",
+      "language": "ar",
+      "category": "Idolatry",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "67",
+      "term": "طواغيت",
+      "language": "ar",
+      "category": "Idolatry",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "68",
+      "term": "الطواغيت",
+      "language": "ar",
+      "category": "Idolatry",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "69",
+      "term": "اللات",
       "language": "ar",
       "category": "Polytheism",
       "match_type": "word",
@@ -166,7 +625,214 @@
       "replacement": "(طوط)"
     },
     {
-      "id": "19",
+      "id": "70",
+      "term": "العزى",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "71",
+      "term": "مناة",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "72",
+      "term": "هبل",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "73",
+      "term": "ود",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "74",
+      "term": "سواع",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "75",
+      "term": "يغوث",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "76",
+      "term": "يعوق",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "77",
+      "term": "نسر",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "78",
+      "term": "بعل",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "79",
+      "term": "زيوس",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "80",
+      "term": "ثور",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "81",
+      "term": "أودين",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "82",
+      "term": "أبولون",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "83",
+      "term": "أفروديت",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "84",
+      "term": "بوسيدون",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "85",
+      "term": "أثينا",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "86",
+      "term": "إيزيس",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "87",
+      "term": "أوزوريس",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "88",
+      "term": "حورس",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "89",
+      "term": "شيفا",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "90",
+      "term": "فيشنو",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "91",
+      "term": "براهما",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "92",
+      "term": "بوذا",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "93",
       "term": "يا إلهي",
       "language": "ar",
       "category": "Inappropriate Phrase",
@@ -175,13 +841,85 @@
       "replacement": "(طوط)"
     },
     {
-      "id": "20",
-      "term": "Oh my god",
-      "language": "en",
+      "id": "94",
+      "term": "باسم الآلهة",
+      "language": "ar",
       "category": "Inappropriate Phrase",
       "match_type": "phrase",
       "case_sensitive": false,
-      "replacement": "[BEEP]"
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "95",
+      "term": "قسم بالآلهة",
+      "language": "ar",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "96",
+      "term": "بحق الآلهة",
+      "language": "ar",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "97",
+      "term": "رحمة الآلهة",
+      "language": "ar",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "98",
+      "term": "غضب الآلهة",
+      "language": "ar",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "99",
+      "term": "بركة الآلهة",
+      "language": "ar",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "100",
+      "term": "عبادة الأصنام",
+      "language": "ar",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "101",
+      "term": "تعدد الآلهة",
+      "language": "ar",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "102",
+      "term": "أستغفر الأوثان",
+      "language": "ar",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
     }
   ]
 }

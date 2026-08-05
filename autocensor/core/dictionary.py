@@ -138,21 +138,20 @@ class CensorshipDictionary:
             if term_obj.language == "ar":
                 # Normalize target term for robust Arabic matching
                 norm_pattern = normalize_arabic(pattern_str)
-                # Match word boundaries or substring
+                # Allow common Arabic prefixes (waw, faa, baa, lam, al)
                 if term_obj.match_type == "word":
-                    regex_pattern = r'(?:\b|\s|^)' + re.escape(norm_pattern) + r'(?:\b|\s|$)'
+                    prefix_pattern = r'(?:[وفبكل]|وال|فال|بال|لل|كال)?'
+                    regex_pattern = r'(?:^|\s|[^\w\u0600-\u06FF])' + prefix_pattern + re.escape(norm_pattern) + r'(?:$|\s|[^\w\u0600-\u06FF])'
                 else:
                     regex_pattern = re.escape(norm_pattern)
 
                 # Search in normalized text
                 for match in re.finditer(regex_pattern, normalized_text, flags):
                     start, end = match.span()
-                    # Extract original text segment corresponding to match
-                    matched_text = text[start:end]
                     matches.append({
                         "start": start,
                         "end": end,
-                        "matched_text": matched_text,
+                        "matched_text": text[start:end],
                         "term": term_obj.term,
                         "category": term_obj.category,
                         "replacement": term_obj.replacement
