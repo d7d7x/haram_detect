@@ -1,5 +1,4 @@
 @echo off
-title AutoCensor AI Launcher
-cd /d "G:\antigravity\ChangeSup"
-python main.py
-pause
+cd /d "%~dp0"
+start "" pythonw main.py
+exit
