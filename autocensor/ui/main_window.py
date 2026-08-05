@@ -8,6 +8,7 @@ from autocensor.core.dictionary import CensorshipDictionary
 from autocensor.ui.processing_tab import ProcessingTabFrame
 from autocensor.ui.dictionary_tab import DictionaryTabFrame
 from autocensor.ui.watcher_tab import WatcherTabFrame
+from autocensor.ui.stremio_tab import StremioTabFrame
 from autocensor.utils.ffmpeg_utils import is_ffmpeg_available
 
 logger = logging.getLogger(__name__)
@@ -67,10 +68,12 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
             self.tabview.pack(fill="both", expand=True, padx=15, pady=10)
 
             self.tabview.add("Media Processing")
+            self.tabview.add("Stremio Integration")
             self.tabview.add("Prohibited Terms Dictionary")
             self.tabview.add("Folder Watcher Service")
 
             ProcessingTabFrame(self.tabview.tab("Media Processing"), self.dictionary).pack(fill="both", expand=True)
+            StremioTabFrame(self.tabview.tab("Stremio Integration"), self.dictionary).pack(fill="both", expand=True)
             DictionaryTabFrame(self.tabview.tab("Prohibited Terms Dictionary"), self.dictionary).pack(fill="both", expand=True)
             WatcherTabFrame(self.tabview.tab("Folder Watcher Service"), self.dictionary).pack(fill="both", expand=True)
 
@@ -79,16 +82,20 @@ class AutoCensorApp(ctk.CTk if HAS_CTK else tk.Tk):
             notebook.pack(fill="both", expand=True, padx=10, pady=10)
 
             proc_tab = tk.Frame(notebook)
+            stremio_tab = tk.Frame(notebook)
             dict_tab = tk.Frame(notebook)
             watch_tab = tk.Frame(notebook)
 
             notebook.add(proc_tab, text="Media Processing")
+            notebook.add(stremio_tab, text="Stremio Integration")
             notebook.add(dict_tab, text="Prohibited Terms Dictionary")
             notebook.add(watch_tab, text="Folder Watcher Service")
 
             ProcessingTabFrame(proc_tab, self.dictionary).pack(fill="both", expand=True)
+            StremioTabFrame(stremio_tab, self.dictionary).pack(fill="both", expand=True)
             DictionaryTabFrame(dict_tab, self.dictionary).pack(fill="both", expand=True)
             WatcherTabFrame(watch_tab, self.dictionary).pack(fill="both", expand=True)
+
 
     def create_statusbar(self):
         sb_frame = ctk.CTkFrame(self, height=28, fg_color=THEME["surface_light"]) if HAS_CTK else tk.Frame(self, bg="#334155", height=24)
