@@ -95,7 +95,10 @@ def locate_subtitle_candidates_in_cache(cache_dir: Optional[Path] = None) -> Lis
     return sub_files
 
 def extract_embedded_subtitles(video_path: Path, output_dir: Optional[Path] = None) -> Optional[Path]:
-    """Extract embedded subtitle track from video file using FFmpeg into an SRT file."""
+    """
+    Extract embedded subtitle track from video file using FFmpeg into an SRT file.
+    Prioritizes Arabic (ara / ar) subtitle tracks first, then English, then default.
+    """
     if not video_path.exists():
         return None
 
@@ -103,7 +106,25 @@ def extract_embedded_subtitles(video_path: Path, output_dir: Optional[Path] = No
     out_dir.mkdir(parents=True, exist_ok=True)
     out_srt = out_dir / f"{video_path.stem}_embedded.srt"
 
-    cmd = [
+    # Attempt 1: Arabic subtitle stream (ara / ar)
+    for lang in ["ara", "ar", "eng", "en"]:
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(video_path),
+            "-map", f"0:s:m:language:{lang}",
+            "-c:s", "srt",
+            str(out_srt)
+        ]
+        try:
+            res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if out_srt.exists() and out_srt.stat().st_size > 0:
+                logger.info(f"Extracted embedded {lang.upper()} subtitle -> {out_srt.name}")
+                return out_srt
+        except Exception:
+            pass
+
+    # Fallback Attempt: First available subtitle stream
+    fallback_cmd = [
         "ffmpeg", "-y",
         "-i", str(video_path),
         "-map", "0:s:0?",
@@ -111,9 +132,9 @@ def extract_embedded_subtitles(video_path: Path, output_dir: Optional[Path] = No
         str(out_srt)
     ]
     try:
-        res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+        res = subprocess.run(fallback_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
         if out_srt.exists() and out_srt.stat().st_size > 0:
-            logger.info(f"Extracted embedded subtitle -> {out_srt.name}")
+            logger.info(f"Extracted default embedded subtitle -> {out_srt.name}")
             return out_srt
     except Exception as e:
         logger.debug(f"Embedded subtitle extraction notice for {video_path.name}: {e}")
