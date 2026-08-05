@@ -166,11 +166,16 @@ class StremioTabFrame(ctk.CTkFrame if HAS_CTK else tk.Frame):
                                 live_bleeper.schedule_bleeps_for_timestamps(timestamps)
                         return
                     elif file_path.suffix.lower() in [".mp4", ".mkv", ".avi"]:
-                        # Also check if accompanying subtitle file exists in cache
-                        for ext in [".srt", ".vtt", ".ass"]:
-                            cand = file_path.with_suffix(ext)
-                            if cand.exists():
-                                live_sub_modifier.process_subtitle_in_place(cand)
+                        # Extract embedded subtitle or check for existing subtitle file
+                        extracted_srt = live_sub_modifier.extract_and_clean_embedded_subtitle(file_path)
+                        target_sub = extracted_srt or file_path.with_suffix(".srt")
+
+                        if target_sub.exists():
+                            items = self.processor.sub_engine.parse_subtitle(target_sub)
+                            timestamps = [(it.start_sec, it.end_sec) for it in items if self.dictionary.find_matches(it.text)]
+                            if timestamps:
+                                self.log(f"[LIVE BLEEP SCHEDULED] Scheduled {len(timestamps)} (طوط) audio bleeps for {file_path.name}")
+                                live_bleeper.schedule_bleeps_for_timestamps(timestamps)
 
                 else:
                     # Solution 2: Full FFmpeg Video Re-Muxing Engine (Previous Solution)

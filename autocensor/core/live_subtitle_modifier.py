@@ -53,3 +53,30 @@ class LiveSubtitleModifier:
         except Exception as e:
             logger.error(f"Error modifying subtitle in-place ({sub_path.name}): {e}")
             return False
+
+    def extract_and_clean_embedded_subtitle(self, video_path: Path) -> Optional[Path]:
+        """
+        Extract embedded subtitle track from Stremio video file using FFmpeg,
+        clean prohibited terms ('God', 'إله', etc.), and save alongside video as .srt.
+        """
+        if not video_path.exists():
+            return None
+
+        out_srt = video_path.with_suffix(".srt")
+        import subprocess
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(video_path),
+            "-map", "0:s:0?",
+            "-c:s", "srt",
+            str(out_srt)
+        ]
+        try:
+            subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            if out_srt.exists() and out_srt.stat().st_size > 0:
+                logger.info(f"Extracted embedded subtitle for {video_path.name} -> {out_srt.name}")
+                self.process_subtitle_in_place(out_srt)
+                return out_srt
+        except Exception as e:
+            logger.debug(f"Subtitle extraction notice: {e}")
+        return None
