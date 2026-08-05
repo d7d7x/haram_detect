@@ -1,0 +1,187 @@
+{
+  "version": "1.0",
+  "default_replacement_ar": "(طوط)",
+  "default_replacement_en": "[BEEP]",
+  "terms": [
+    {
+      "id": "1",
+      "term": "gods",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "2",
+      "term": "demigod",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "3",
+      "term": "demigods",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "4",
+      "term": "kami",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "5",
+      "term": "Zeus",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "6",
+      "term": "Thor",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "7",
+      "term": "Odin",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "8",
+      "term": "goddess",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "9",
+      "term": "goddesses",
+      "language": "en",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    },
+    {
+      "id": "10",
+      "term": "آلهة",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "11",
+      "term": "الآلهة",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "12",
+      "term": "آلهتهم",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "13",
+      "term": "ربات",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "14",
+      "term": "إلهة",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "15",
+      "term": "صنم",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "16",
+      "term": "أصنام",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "17",
+      "term": "وثن",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "18",
+      "term": "أوثان",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "19",
+      "term": "يا إلهي",
+      "language": "ar",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "20",
+      "term": "Oh my god",
+      "language": "en",
+      "category": "Inappropriate Phrase",
+      "match_type": "phrase",
+      "case_sensitive": false,
+      "replacement": "[BEEP]"
+    }
+  ]
+}
