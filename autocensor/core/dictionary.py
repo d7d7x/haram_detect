@@ -9,6 +9,11 @@ from autocensor.utils.helpers import normalize_arabic, strip_tashkeel
 
 logger = logging.getLogger(__name__)
 
+# Common Arabic prefixes (waw, faa, baa, lam, al, laa, etc.)
+ARABIC_PREFIXES = r'(?:[وفبكل]|وال|فال|بال|لل|كال|ولا|فلا)?'
+# Common Arabic suffixes (pronouns, accusative, dual, plural)
+ARABIC_SUFFIXES = r'(?:ها|هم|كم|نا|ين|ان|ية|يةً|اً|ه|ي)?'
+
 class CensorshipTerm:
     def __init__(
         self,
@@ -26,7 +31,7 @@ class CensorshipTerm:
         self.category = category
         self.match_type = match_type  # 'word', 'phrase', 'regex'
         self.case_sensitive = case_sensitive
-        self.replacement = replacement or ("[BEEP]" if language == "en" else "(طوط)")
+        self.replacement = replacement if replacement is not None else ("[BEEP]" if language == "en" else "(طوط)")
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -82,7 +87,7 @@ class CensorshipDictionary:
         save_path = target_path or USER_DICTIONARY_PATH
         save_path.parent.mkdir(parents=True, exist_ok=True)
         data = {
-            "version": "1.0",
+            "version": "2.1",
             "default_replacement_ar": "(طوط)",
             "default_replacement_en": "[BEEP]",
             "terms": [t.to_dict() for t in self.terms]
@@ -136,28 +141,25 @@ class CensorshipDictionary:
             flags = 0 if term_obj.case_sensitive else re.IGNORECASE
 
             if term_obj.language == "ar":
-                # Normalize target term for robust Arabic matching
                 norm_pattern = normalize_arabic(pattern_str)
-                # Allow common Arabic prefixes (waw, faa, baa, lam, al)
                 if term_obj.match_type == "word":
-                    prefix_pattern = r'(?:[وفبكل]|وال|فال|بال|لل|كال)?'
-                    regex_pattern = r'(?:^|\s|[^\w\u0600-\u06FF])' + prefix_pattern + re.escape(norm_pattern) + r'(?:$|\s|[^\w\u0600-\u06FF])'
+                    # Build robust Arabic regex matching prefixes, suffixes, and punctuation
+                    regex_pattern = r'(?:^|\s|[^\w\u0600-\u06FF])' + ARABIC_PREFIXES + re.escape(norm_pattern) + ARABIC_SUFFIXES + r'(?:$|\s|[^\w\u0600-\u06FF])'
                 else:
                     regex_pattern = re.escape(norm_pattern)
 
-                # Search in normalized text
                 for match in re.finditer(regex_pattern, normalized_text, flags):
                     start, end = match.span()
+                    raw_segment = text[start:end]
                     matches.append({
                         "start": start,
                         "end": end,
-                        "matched_text": text[start:end],
+                        "matched_text": raw_segment,
                         "term": term_obj.term,
                         "category": term_obj.category,
                         "replacement": term_obj.replacement
                     })
             else:
-                # English / Latin matching
                 if term_obj.match_type == "word":
                     regex_pattern = r'\b' + re.escape(pattern_str) + r'\b'
                 else:
@@ -174,6 +176,5 @@ class CensorshipDictionary:
                         "replacement": term_obj.replacement
                     })
 
-        # Sort matches by start position
         matches.sort(key=lambda x: x["start"])
         return matches

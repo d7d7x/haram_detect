@@ -1,8 +1,35 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "default_replacement_ar": "(طوط)",
   "default_replacement_en": "[BEEP]",
   "terms": [
+    {
+      "id": "103",
+      "term": "إله",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "104",
+      "term": "إلها",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
+    {
+      "id": "105",
+      "term": "أرباب",
+      "language": "ar",
+      "category": "Polytheism",
+      "match_type": "word",
+      "case_sensitive": false,
+      "replacement": "(طوط)"
+    },
     {
       "id": "1",
       "term": "gods",

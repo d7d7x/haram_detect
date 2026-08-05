@@ -104,7 +104,12 @@ class SubtitleEngine:
                     start = m["start"]
                     end = m["end"]
                     replacement = m["replacement"]
-                    censored_text = censored_text[:start] + replacement + censored_text[end:]
+                    if replacement in ["", "[REMOVE]"]:
+                        censored_text = censored_text[:start] + censored_text[end:]
+                        # Clean up any leftover double spaces
+                        censored_text = re.sub(r'\s+', ' ', censored_text).strip()
+                    else:
+                        censored_text = censored_text[:start] + replacement + censored_text[end:]
 
                 detections.append({
                     "start_sec": item.start_sec,
