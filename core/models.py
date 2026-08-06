@@ -83,7 +83,7 @@ class TermList:
 class AppSettings:
     ffmpeg_path: str = "ffmpeg"
     ffprobe_path: str = "ffprobe"
-    whisper_model: str = "large-v3-turbo"
+    whisper_model: str = "medium"
     device: str = "auto"
     compute_type: str = "default"
     language: str = "ar"

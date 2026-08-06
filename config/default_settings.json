@@ -1,7 +1,7 @@
 {
   "ffmpeg_path": "ffmpeg",
   "ffprobe_path": "ffprobe",
-  "whisper_model": "large-v3-turbo",
+  "whisper_model": "medium",
   "device": "auto",
   "compute_type": "default",
   "language": "ar",
