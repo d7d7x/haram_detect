@@ -30,8 +30,15 @@ class TranscriptionService:
         if self.settings.compute_type != "default":
             compute_type = self.settings.compute_type
 
-        logger.info(f"Initializing WhisperModel on {device} ({compute_type})...")
-        model = WhisperModel(self.settings.whisper_model, device=device, compute_type=compute_type)
+        import os
+        cpu_threads = os.cpu_count() or 4
+        logger.info(f"Initializing WhisperModel on {device} ({compute_type}) using {cpu_threads} CPU threads...")
+        model = WhisperModel(
+            self.settings.whisper_model,
+            device=device,
+            compute_type=compute_type,
+            cpu_threads=cpu_threads
+        )
 
         lang = None if self.settings.language == "auto" else self.settings.language
 
