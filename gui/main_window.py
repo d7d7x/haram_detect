@@ -130,7 +130,7 @@ class MainWindow(QMainWindow):
 
         # Subtitle selection & Output Folder
         sub_row = QHBoxLayout()
-        sub_row.addWidget(QLabel("External Subtitle (Optional):"))
+        sub_row.addWidget(QLabel("External Subtitle (.srt/.vtt):"))
         self.btn_select_sub = QPushButton("Select Subtitle...")
         self.btn_select_sub.clicked.connect(self.browse_subtitle)
         self.sub_label = QLabel("None")
@@ -138,6 +138,16 @@ class MainWindow(QMainWindow):
         sub_row.addWidget(self.sub_label)
         sub_row.addStretch()
         layout.addLayout(sub_row)
+
+        # MKV Embedded Subtitle Selection
+        emb_sub_row = QHBoxLayout()
+        emb_sub_row.addWidget(QLabel("MKV Embedded Subtitle Track (ترجمة MKV المدمجة):"))
+        self.embedded_sub_combo = QComboBox()
+        self.embedded_sub_combo.addItem("Auto-Detect Embedded Subtitle Track (Recommended)", -2)
+        self.embedded_sub_combo.addItem("None - Force Whisper AI Speech Recognition", -1)
+        emb_sub_row.addWidget(self.embedded_sub_combo)
+        emb_sub_row.addStretch()
+        layout.addLayout(emb_sub_row)
 
         # Start Button
         btn_start = QPushButton("Start Sanitization Process")
@@ -163,9 +173,20 @@ class MainWindow(QMainWindow):
                     "status": "Ready"
                 })
                 item_text = f"{Path(fp).name} | {info.duration:.1f}s | Codec: {info.video_codec} | Size: {info.file_size_bytes/(1024*1024):.1f}MB"
+                if info.subtitle_streams:
+                    item_text += f" [{len(info.subtitle_streams)} Embedded Subtitle Track(s)]"
                 if info.is_drm_protected:
                     item_text += " [DRM PROTECTED - ERROR]"
                 self.queue_list.addItem(item_text)
+
+                # Populate embedded subtitle track dropdown
+                self.embedded_sub_combo.clear()
+                if info.subtitle_streams:
+                    self.embedded_sub_combo.addItem("Auto-Detect Embedded Subtitle Track (Recommended)", -2)
+                    for sub_stream in info.subtitle_streams:
+                        title_str = f"Stream #{sub_stream.index} - {sub_stream.language} ({sub_stream.title or sub_stream.codec_name})"
+                        self.embedded_sub_combo.addItem(title_str, sub_stream.index)
+                self.embedded_sub_combo.addItem("None - Force Whisper AI Speech Recognition", -1)
 
     def clear_queue(self):
         self.file_queue.clear()
@@ -192,6 +213,16 @@ class MainWindow(QMainWindow):
 
         self.tabs.setCurrentWidget(self.progress_view)
 
+        # Resolve embedded subtitle index
+        sel_idx = self.embedded_sub_combo.currentData()
+        if sel_idx is None or sel_idx == -2:
+            sub_streams = item["info"].subtitle_streams
+            if sub_streams:
+                ar_stream = next((s for s in sub_streams if s.language in ["ara", "ar", "arabic"]), None)
+                sel_idx = ar_stream.index if ar_stream else sub_streams[0].index
+            else:
+                sel_idx = -1
+
         # Re-instantiate job runner with latest settings/terms
         self.job_runner = JobRunner(self.config_manager.settings, self.config_manager.term_lists)
 
@@ -199,7 +230,7 @@ class MainWindow(QMainWindow):
             job_runner=self.job_runner,
             video_path=item["path"],
             external_sub=item.get("sub_path", ""),
-            embedded_idx=-1
+            embedded_idx=sel_idx
         )
         self.worker_thread.progress_signal.connect(self.progress_view.update_progress)
         self.worker_thread.review_requested_signal.connect(self.on_review_requested)
