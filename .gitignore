@@ -1,0 +1,27 @@
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# Python cache & build outputs
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Logs and temporary media files
+*.log
+sanitizer.log
+temp_workspace/
+*.tmp
+*.mp4
+*.mkv
+*.webm
+*.srt
+*.txt
+
+# IDE & System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
