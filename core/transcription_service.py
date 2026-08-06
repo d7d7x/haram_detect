@@ -26,6 +26,15 @@ class TranscriptionService:
             except Exception:
                 device = "cpu"
 
+        if device == "cuda":
+            try:
+                import torch, os
+                torch_lib_path = os.path.join(os.path.dirname(torch.__file__), "lib")
+                if os.path.exists(torch_lib_path) and hasattr(os, "add_dll_directory"):
+                    os.add_dll_directory(torch_lib_path)
+            except Exception as e:
+                logger.warning(f"Failed to register torch CUDA DLL path: {e}")
+
         compute_type = "float16" if device == "cuda" else "int8"
         if self.settings.compute_type != "default":
             compute_type = self.settings.compute_type
